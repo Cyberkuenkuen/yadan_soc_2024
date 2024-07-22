@@ -1,7 +1,6 @@
 import sys
 import filecmp
 import subprocess
-import sys
 import os
 
 def main():
