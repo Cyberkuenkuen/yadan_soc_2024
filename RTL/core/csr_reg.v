@@ -92,7 +92,7 @@ module csr_reg(
     assign interrupt_csr_mepc = csr_mepc;
     assign interrupt_csr_mstatus = csr_mstatus;
 
-    always @ (posedge clk) begin
+    always @ (posedge clk or negedge rst) begin
         if (rst == `RstEnable) begin
             csr_mcycle  <= {`ZeroWord, `ZeroWord};
         end 
@@ -114,7 +114,7 @@ module csr_reg(
     end
 
     // write  regs
-    always @ (posedge clk) begin
+    always @ (posedge clk or negedge rst) begin
         if (rst == `RstEnable) begin
             csr_mstatus     <= `ZeroWord;
             csr_misa        <= (`MISA_RV32 | `MISA_RVI);
@@ -199,99 +199,91 @@ module csr_reg(
 
     // read regs
     always @ (*) begin
-        if (rst == `RstEnable) begin
-            rdata <= `ZeroWord;
-        end else begin
             case (raddr_i[11:0])
                 `CSR_MSTATUS: begin
-                    rdata <= csr_mstatus ;//& `CSR_MSTATUS_MASK;
+                    rdata = csr_mstatus ;//& `CSR_MSTATUS_MASK;
                 end 
                 `CSR_MSCRATCH: begin
-                    rdata <= csr_mscratch ;//& `CSR_MSCRATCH_MASK;
+                    rdata = csr_mscratch ;//& `CSR_MSCRATCH_MASK;
                 end
                 `CSR_MEPC: begin
-                    rdata <= csr_mepc ;//& `CSR_MEPC_MASK;
+                    rdata = csr_mepc ;//& `CSR_MEPC_MASK;
                 end
                 `CSR_MTVEC: begin
-                    rdata <= csr_mtvec ;//& `CSR_MTVEC_MASK;
+                    rdata = csr_mtvec ;//& `CSR_MTVEC_MASK;
                 end
                 `CSR_MTVAL: begin
-                    rdata <= csr_mtval ;//& `CSR_MTVAL_MASK;
+                    rdata = csr_mtval ;//& `CSR_MTVAL_MASK;
                 end
                 `CSR_MCAUSE: begin
-                    rdata <= csr_mcause ;//& `CSR_MCAUSE_MASK;
+                    rdata = csr_mcause ;//& `CSR_MCAUSE_MASK;
                 end
                 `CSR_MIP: begin
-                    rdata <= csr_mip ;
+                    rdata = csr_mip ;
                 end
                 `CSR_MIE: begin
-                    rdata <= csr_mie;
+                    rdata = csr_mie;
                 end
                 `CSR_MCYCLE: begin
-                    rdata <= csr_mcycle[31:0];
+                    rdata = csr_mcycle[31:0];
                 end
                 `CSR_MCYCLEH: begin
-                    rdata <= csr_mcycle[63:32];
+                    rdata = csr_mcycle[63:32];
                 end
                 `CSR_MHARTID: begin
-                    rdata <= csr_mhartid;
+                    rdata = csr_mhartid;
                 end
                 `CSR_SSCRATCH: begin
-                    rdata <= csr_sscratch ;//& `CSR_SSCRATCH_MASK; 
+                    rdata = csr_sscratch ;//& `CSR_SSCRATCH_MASK; 
                 end
                 default: begin
-                    rdata <= `ZeroWord;
+                    rdata = `ZeroWord;
                 end
             endcase
-        end
     end
     assign rdata_o = ((raddr_i[11:0] == waddr_i[11:0]) && (we_i == `WriteEnable))?wdata_i:rdata;  //数据相关，读的寄存器就是写的寄存器则返回写的值。
    
    
    //interrupt_ctrl模块读csr
     always @(*) begin
-        if (rst == `RstEnable) begin
-            interrupt_data <= `ZeroWord;
-        end else begin
             case (interrupt_raddr_i[11:0])
                 `CSR_MSTATUS: begin
-                    interrupt_data <= csr_mstatus ;//& `CSR_MSTATUS_MASK;
+                    interrupt_data = csr_mstatus ;//& `CSR_MSTATUS_MASK;
                 end 
                 `CSR_MSCRATCH: begin
-                    interrupt_data <= csr_mscratch ;//& `CSR_MSCRATCH_MASK;
+                    interrupt_data = csr_mscratch ;//& `CSR_MSCRATCH_MASK;
                 end
                 `CSR_MEPC: begin
-                    interrupt_data <= csr_mepc ;//& `CSR_MEPC_MASK;
+                    interrupt_data = csr_mepc ;//& `CSR_MEPC_MASK;
                 end
                 `CSR_MTVEC: begin
-                    interrupt_data <= csr_mtvec ;//& `CSR_MTVEC_MASK;
+                    interrupt_data = csr_mtvec ;//& `CSR_MTVEC_MASK;
                 end
                 `CSR_MTVAL: begin
-                    interrupt_data <= csr_mtval ;//& `CSR_MTVAL_MASK;
+                    interrupt_data = csr_mtval ;//& `CSR_MTVAL_MASK;
                 end
                 `CSR_MCAUSE: begin
-                    interrupt_data <= csr_mcause ;//& `CSR_MCAUSE_MASK;
+                    interrupt_data = csr_mcause ;//& `CSR_MCAUSE_MASK;
                 end
                 `CSR_MIP: begin
-                    interrupt_data <= csr_mip ;
+                    interrupt_data = csr_mip ;
                 end
                 `CSR_MIE: begin
-                    interrupt_data <= csr_mie;
+                    interrupt_data = csr_mie;
                 end
                 `CSR_MCYCLE: begin
-                    interrupt_data <= csr_mcycle[31:0];
+                    interrupt_data = csr_mcycle[31:0];
                 end
                 `CSR_MCYCLEH: begin
-                    interrupt_data <= csr_mcycle[63:32];
+                    interrupt_data = csr_mcycle[63:32];
                 end
                 `CSR_MHARTID: begin
-                    interrupt_data <= csr_mhartid;
+                    interrupt_data = csr_mhartid;
                 end
                 default: begin
-                    interrupt_data <= `ZeroWord;
+                    interrupt_data = `ZeroWord;
                 end
             endcase
-        end
     end
 
     assign interrupt_data_o = ((interrupt_raddr_i[11:0] == interrupt_waddr_i[11:0]) && (interrupt_we_i == `WriteEnable))?interrupt_data_i:interrupt_data;

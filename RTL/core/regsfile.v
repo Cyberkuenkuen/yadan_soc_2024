@@ -118,7 +118,7 @@ module regsfile
     assign we = we_i;//(int_assert_i == `INT_ASSERT)? `WriteDisable: we_i;
 
     //write
-    always @(posedge clk) begin 
+    always @(posedge clk or negedge rst) begin 
         if (rst == `RstEnable) begin
             reg_r1_q       <= 32'h00000000;
             reg_r2_q       <= 32'h00000000;
@@ -193,10 +193,7 @@ module regsfile
     reg[`RegBus]        rdata2_r;
 
     always @(*) begin
-        if (rst == `RstEnable) begin
-            rdata1_r = `ZeroWord;
-        end
-        else if ((raddr1_i == waddr_i) && (we == `WriteEnable) && (re1_i == `ReadEnable)) begin
+        if ((raddr1_i == waddr_i) && (we == `WriteEnable) && (re1_i == `ReadEnable)) begin
             rdata1_r = wdata_i;
         end
         else if (re1_i == `ReadEnable) begin
@@ -242,10 +239,7 @@ module regsfile
 
     //read reg2
         always @(*) begin
-        if (rst == `RstEnable) begin
-            rdata2_r = `ZeroWord;
-        end
-        else if ((raddr2_i == waddr_i) && (we == `WriteEnable) && (re2_i == `ReadEnable)) begin
+        if ((raddr2_i == waddr_i) && (we == `WriteEnable) && (re2_i == `ReadEnable)) begin
             rdata2_r = wdata_i;
         end
         else if (re2_i == `ReadEnable) begin

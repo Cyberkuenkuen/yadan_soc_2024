@@ -44,12 +44,6 @@ module ctrl(
 );
 
     always @ (*) begin
-        if (rst == `RstEnable) begin
-            stalled_o       = 6'b000000;
-            flush_o         = 6'b000000;
-            branch_flag_o   = `BranchDisable;
-            branch_addr_o   = `ZeroWord;
-        end else begin
             branch_flag_o   = branch_flag_i;
             branch_addr_o   = branch_addr_i;
             // stalled_o       = 6'b000000;
@@ -76,8 +70,6 @@ module ctrl(
                 stalled_o   = 6'b000000;
                 // flush_o     = 6'b000000;
             end            
-        end
-
     end
 
 endmodule // ctrl

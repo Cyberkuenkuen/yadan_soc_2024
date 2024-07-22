@@ -41,7 +41,7 @@ module pc_reg(
 
     assign  ce_o = PCchange_enable;
 
-    always  @ (posedge clk) begin
+    always  @ (posedge clk or negedge rst) begin
         if(rst == `RstEnable) begin
             if(set_mode) begin
                 pc_o    <=  `StartAdd;

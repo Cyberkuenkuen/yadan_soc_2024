@@ -23,7 +23,7 @@ SOFTWARE.
 
 ******************************************************************************/
 
-`include "yadan_defs.v"
+`include "../core/yadan_defs.v"
 
 module data_ram(
     input   wire                clk,
@@ -85,15 +85,10 @@ module data_ram(
 
     // read 
     always @ (*) begin
-        if (rst == `RstEnable) begin
-            data_o <= `ZeroWord;
-        end else 
         if (ce == `ReadEnable) 
         begin
-      
              data_o  <=  data_mem[addr[`DataMemNumLog2+1 : 2]];
         end
-    
     end
 
 endmodule // data_ram

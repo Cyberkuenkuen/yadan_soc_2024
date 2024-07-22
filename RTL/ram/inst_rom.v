@@ -23,7 +23,7 @@ SOFTWARE.
 
 ******************************************************************************/
 
-`include "yadan_defs.v"
+`include "../core/yadan_defs.v"
 
 module inst_rom(
     // input   wire                clk,
@@ -36,7 +36,7 @@ module inst_rom(
     reg[`InstBus]   inst_mem[0:`InstMemNum-1];
     wire [`InstMemNumLog2-1:0] addr_for_rom = addr_i[`InstMemNumLog2+1:2];
 
-    // 当复位信号无效时，依据输入的地址，给出指令存储器 ROM 中对应的元素
+    // 当使能有效时，依据输入的地址，给出指令存储器 ROM 中对应的元素
     always  @ (*) begin
         if (ce_i == `ReadDisable) begin
             inst_o  <= `ZeroWord;

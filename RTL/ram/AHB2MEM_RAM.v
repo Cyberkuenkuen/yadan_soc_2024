@@ -39,19 +39,8 @@ module AHB2MEM_RAM
 
    // Sample the Address Phase    
 
-   always @(*)//posedge HCLK or negedge HRESETn)
+   always @(*)//posedge HCLK or negedge HRESETn) 
    begin
-      if(!HRESETn)
-      begin
-        //  we <= 1'b0;
-        //  buf_hwaddr <= 32'h0;
-        byteena = 4'b0000;
-        data_i0 = 8'h0;
-        data_i1 = 8'h0;
-        data_i2 = 8'h0;
-        data_i3 = 8'h0;
-      end
-      else begin
          if(HREADY)
          begin
             data_i0 = HWDATA[7:0];
@@ -107,7 +96,6 @@ module AHB2MEM_RAM
               data_i3 = HWDATA[31:24];
               byteena = 4'b0000;
           end
-        end
    end
    
 //     dataram  u_ram

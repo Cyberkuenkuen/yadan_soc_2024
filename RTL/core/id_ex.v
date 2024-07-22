@@ -62,7 +62,7 @@ module id_ex(
     output  reg[`DataAddrBus]   ex_wd_csr_reg
 );
 
-    always @ (posedge clk)  begin
+    always @ (posedge clk or negedge rst)  begin
         if (rst == `RstEnable) begin
             ex_pc_o         <= `ZeroWord;
             ex_inst_o       <= `ZeroWord;

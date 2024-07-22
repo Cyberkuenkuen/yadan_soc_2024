@@ -80,19 +80,6 @@ module cpu_ahb_mem
     end 
 
     always @ (* )  begin 
-       if(rst == `RstEnable)begin
-            cpu_readdate_o  = `ZeroWord;
-            M_HBUSREQ   = 1'b0;
-            M_HADDR     = `ZeroWord;
-            M_HTRANS    = 2'b10;
-            M_HSIZE     = 3'b010;
-            M_HBURST    = 3'b000;
-            M_HWRITE    = 1'b0;
-            M_HWDATA    = `ZeroWord;
-            nxt_state   =  IDLE;
-            stallreq    =   1'b0;
-        end
-        else begin
             M_HSIZE     =   cpu_sel_i;
             M_HADDR     =   cpu_addr_i;
             M_HWRITE    =   cpu_we_i;
@@ -184,10 +171,7 @@ module cpu_ahb_mem
                         nxt_state   =   IDLE;                         
                     end 
                 end
-            
             endcase
-        end
-       
     end
 
 

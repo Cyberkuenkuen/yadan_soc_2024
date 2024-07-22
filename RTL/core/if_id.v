@@ -42,7 +42,7 @@ module if_id(
     output  reg[`InstBus]           inst_o
 );
 
-    always @ (posedge clk)  begin
+    always @ (posedge clk or negedge rst)  begin
         if (rst == `RstEnable) begin
             pc_o    <= `ZeroWord;
             inst_o  <= `ZeroWord;

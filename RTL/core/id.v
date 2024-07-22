@@ -112,7 +112,8 @@ module id(
 
     //*******   对指令译码    *******//
     always @ (*) begin
-        if (rst == `RstEnable || (ex_branch_flag_i == `BranchEnable && inst_i != `ZeroWord)) begin
+        // if (rst == `RstEnable || (ex_branch_flag_i == `BranchEnable && inst_i != `ZeroWord)) begin
+        if (ex_branch_flag_i == `BranchEnable && inst_i != `ZeroWord) begin
             aluop_o         = `EXE_NONE;
             alusel_o        = `EXE_RES_NONE;
             reg_wd_o        = `NOPRegAddr;
@@ -755,11 +756,7 @@ module id(
 
     // 确定运算的源操作数 1
     always @ (*) begin
-            
-        if (rst == `RstEnable) begin
-            reg1_o  = `ZeroWord;
-            reg1_loadralate = `NoStop;
-        end else if (pre_inst_is_load == 1'b1 && ex_wd_i == reg1_addr_o && reg1_read_o == 1'b1) begin
+        if (pre_inst_is_load == 1'b1 && ex_wd_i == reg1_addr_o && reg1_read_o == 1'b1) begin
             reg1_loadralate = `Stop;  
             reg1_o  = `ZeroWord;        
         end else if ((reg1_read_o == 1'b1) && (reg1_addr_o == 5'b00000)) begin
@@ -790,11 +787,7 @@ module id(
 
     // 确定运算的源操作数 2
     always @ (*) begin
-        
-        if (rst == `RstEnable) begin
-            reg2_o  = `ZeroWord;
-            reg2_loadralate = `NoStop;
-        end else if (pre_inst_is_load == 1'b1 && ex_wd_i == reg2_addr_o && reg2_read_o == 1'b1) begin
+        if (pre_inst_is_load == 1'b1 && ex_wd_i == reg2_addr_o && reg2_read_o == 1'b1) begin
             reg2_loadralate = `Stop; 
             reg2_o  = `ZeroWord; 
         end else if ((reg2_read_o == 1'b1) && (reg2_addr_o == 5'b00000)) begin

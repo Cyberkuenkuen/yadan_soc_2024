@@ -63,16 +63,6 @@ module mem(
     assign  mem_ce_o = mem_ce;//(int_assert_i == `INT_ASSERT)?`Disable : mem_ce;
 
     always  @ (*)   begin
-        if (rst == `RstEnable) begin
-            wd_o        = `NOPRegAddr;
-            wreg_o      = `WriteDisable;
-            wdata_o     = `ZeroWord;
-            mem_addr_o  = `ZeroWord;
-            mem_we      = `WriteDisable;
-            mem_sel_o   = 3'b010;
-            mem_data_o  = `ZeroWord;
-            mem_ce    = `Disable;
-        end else begin
             wd_o        = wd_i;
             wreg_o      = wreg_i;
             wdata_o     = wdata_i;
@@ -206,8 +196,6 @@ module mem(
                     mem_sel_o   = 3'b000;
                 end
             endcase
-
-        end
     end
 
 endmodule // mem

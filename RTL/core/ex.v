@@ -108,43 +108,31 @@ module ex(
 
     //arith
     always @(*) begin
-        if(rst == `RstEnable)   begin
-            muldiv_start_o                  =  1'b0;
-            arithresult                     =  `ZeroWord;
-            muldiv_start_o                  =  1'b0;
-            mul_or_div                      =  `MUL;
-            muldiv_dividend_o               =  `ZeroWord;
-            muldiv_divisor_o                =  `ZeroWord;
-            muldiv_reg1_signed0_unsigned1   = `Unsigned;
-            muldiv_reg2_signed0_unsigned1   = `Unsigned;
-        end
-        else 
-        begin if (muldiv_done) begin   // mul/div 运算结束
-            muldiv_start_o                  =  1'b0;
-            mul_or_div                      =  `MUL;
-            muldiv_dividend_o               =  `ZeroWord;
-            muldiv_divisor_o                =  `ZeroWord;
-            muldiv_reg1_signed0_unsigned1   = `Unsigned;
-            muldiv_reg2_signed0_unsigned1   = `Unsigned; 
-            case (aluop_i)
-                `EXE_DIV,`EXE_DIVU,`EXE_MULHU,`EXE_MULH,`EXE_MULHSU  : begin
-                   arithresult      =  muldiv_result_i[63:32]; 
-                end 
-                `EXE_REM,`EXE_REMU, `EXE_MUL : begin
-                    arithresult     =  muldiv_result_i[31:0];
-                end
-                `EXE_ADD: begin
-                    arithresult     = (reg1_i + reg2_i);
-                end 
-                `EXE_SUB: begin
-                    arithresult     = (reg1_i - reg2_i);
-                end      
-                default: 
-                    arithresult     = `ZeroWord;
-            endcase
-            
-        end   
-            else begin     //mul/div 没有运行或没有运行结束
+            if (muldiv_done) begin   // mul/div 运算结束
+                muldiv_start_o                  =  1'b0;
+                mul_or_div                      =  `MUL;
+                muldiv_dividend_o               =  `ZeroWord;
+                muldiv_divisor_o                =  `ZeroWord;
+                muldiv_reg1_signed0_unsigned1   = `Unsigned;
+                muldiv_reg2_signed0_unsigned1   = `Unsigned; 
+                case (aluop_i)
+                    `EXE_DIV,`EXE_DIVU,`EXE_MULHU,`EXE_MULH,`EXE_MULHSU  : begin
+                    arithresult      =  muldiv_result_i[63:32]; 
+                    end 
+                    `EXE_REM,`EXE_REMU, `EXE_MUL : begin
+                        arithresult     =  muldiv_result_i[31:0];
+                    end
+                    `EXE_ADD: begin
+                        arithresult     = (reg1_i + reg2_i);
+                    end 
+                    `EXE_SUB: begin
+                        arithresult     = (reg1_i - reg2_i);
+                    end      
+                    default: 
+                        arithresult     = `ZeroWord;
+                endcase
+                
+            end else begin     //mul/div 没有运行或没有运行结束
                 arithresult                     = `ZeroWord;
                 muldiv_start_o                  =  1'b0;
                 mul_or_div                      =  `MUL;
@@ -221,16 +209,10 @@ module ex(
                         
                 endcase
             end
-        end
     end
 
     // aluop 传递到 访存阶段
     always @ (*) begin
-        if (rst == `RstEnable) begin
-            ex_aluop_o      =  `EXE_NONE;
-            ex_reg2_o       = `ZeroWord;
-            ex_mem_addr_o   = `ZeroWord;
-        end else begin
             ex_aluop_o  = aluop_i;
             ex_reg2_o   = reg2_i; 
             case (alusel_i)
@@ -244,16 +226,12 @@ module ex(
                     ex_mem_addr_o   = `ZeroWord;
                 end
             endcase
-        end
     end
 
     
     // 1. 根据 aluop_i 指示的运算子类型进行运算 
     // logic 
     always @ (*) begin
-        if (rst == `RstEnable) begin
-            logicout    = `ZeroWord;
-        end else begin
             case (aluop_i)
                 `EXE_AND: begin
                     logicout    = (reg1_i & reg2_i);
@@ -268,14 +246,10 @@ module ex(
                     logicout    = `ZeroWord;
                 end
             endcase
-        end // if
     end // always
 
     // compare
     always @ (*) begin
-        if (rst == `RstEnable) begin
-            compare = `ZeroWord;
-        end else begin
             case (aluop_i)
                 `EXE_SLT:  begin
                     if (reg1_i[31] != reg2_i[31]) begin
@@ -291,14 +265,10 @@ module ex(
                     compare = `ZeroWord;
                 end
             endcase
-        end
     end
 
     // shift
     always @ (*) begin
-        if (rst == `RstEnable) begin
-            shiftres    = `ZeroWord;
-        end else begin
             case (aluop_i)
                 `EXE_SLL: begin
                     shiftres    = (reg1_i << reg2_i[4:0]);
@@ -316,16 +286,10 @@ module ex(
                     shiftres    = `ZeroWord;
                 end
             endcase
-        end
     end
 
     // branch 
     always @ (*) begin
-        if (rst == `RstEnable) begin
-            branch_flag     = `BranchDisable;
-            branch_addr     = `ZeroWord;
-            branchres       = `ZeroWord;
-        end else begin
             branch_addr     = `ZeroWord;
             branchres       = `ZeroWord;
             case (aluop_i)
@@ -412,7 +376,6 @@ module ex(
                     branchres       = `ZeroWord;
                 end
             endcase
-        end
     end
 
     // csrr
@@ -420,9 +383,6 @@ module ex(
     assign wd_csr_reg_o = wd_csr_reg_i;
 
     always @ (*) begin
-        if (rst == `RstEnable) begin
-            wcsr_data_o = `ZeroWord;
-        end else begin
             case (aluop_i)
                 `EXE_CSRRW: begin
                     wcsr_data_o = reg1_i;
@@ -437,7 +397,6 @@ module ex(
                     wcsr_data_o = `ZeroWord;
                 end
             endcase
-        end
     end
 
 
