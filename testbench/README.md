@@ -21,3 +21,19 @@ To view the waveform:
 gtkwave yadan_riscv_sopc_tb.vcd
 ```
 
+### Run the testbench in Qestasim
+
+In the current directory (testbench):
+
+```
+vsim -64 -do ./questasim/simulation.tcl
+```
+
+or
+
+```
+vsim -64
+QuestaSim> -do ./questasim/simulation.tcl
+```
+
+If the test is successful, the program will print “test pass”.

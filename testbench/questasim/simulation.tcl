@@ -1,7 +1,7 @@
 #Set the source directory
 
-set TB_FILE ../yadan_riscv_sopc_tb.v
-set RTL_DIR ../../RTL
+set TB_FILE ./yadan_riscv_sopc_tb.v
+set RTL_DIR ../RTL
 # set CORE_DIR ${RTL_DIR}/core
 # set PERIPHERY_DIR ${RTL_DIR}/periphery
 # set MEMORY_DIR ${RTL_DIR}/ram
@@ -15,7 +15,7 @@ vlib work
 # }
 
 #Compile RTL design into "work"
-set hierarchy_files [split [read [open ./hierarchy.txt r]] "\n"]
+set hierarchy_files [split [read [open ./questasim/hierarchy.txt r]] "\n"]
 foreach filename [lrange ${hierarchy_files} 0 end-1] {
     vlog -work work ${RTL_DIR}/${filename}
 }
@@ -27,7 +27,7 @@ vlog -work work ${TB_FILE}
 vsim work.yadan_riscv_sopc_tb -voptargs=+acc
 
 #Load the waveform.
-do wave.do
+# do wave.do
 
 #Run simulation
-run 100000 ns;
+run 1000000 ns
