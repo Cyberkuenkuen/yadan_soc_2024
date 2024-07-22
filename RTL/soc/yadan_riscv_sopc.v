@@ -40,9 +40,8 @@ module yadan_riscv_sopc(
     output 	test_sck,	
     output  test_scs,	
     output  test_sdi,	
-    output  test_sdo,
-
-    inout  wire        [15:0]gpio
+    output  test_sdo/* ,
+    inout  wire        [15:0]gpio */
 );
 
     assign test_sck = spi_master_sck;
@@ -89,7 +88,7 @@ yadan_riscv  u_yadan_riscv (
     .clk                     ( clk          ),
     .rst                     ( rst          ),
     .set_mode                ( 1'b1     ),
-    .int_i                   (  1'b0     ),//intn 
+    .int_i                   (  6'b0     ),//intn 
     .M0_HGRANT                ( M0_HGRANT     ),
     .M1_HGRANT               ( M1_HGRANT    ),
     .M_HRDATA                ( M_HRDATA     ),
@@ -319,7 +318,7 @@ amba_ahb_m2s5  u_amba_ahb_m2s5 (
     assign S8_PREADY = 1'b1;
     assign S8_PSLVERR = 1'b1;
 
-
+/* 
     ahb_to_apb_9s u_ahb_to_apb_9s(
         .HRESETn        (rst),   
         .HCLK           (clk),
@@ -380,9 +379,9 @@ amba_ahb_m2s5  u_amba_ahb_m2s5 (
         .S8_PREADY      (S8_PREADY  ),       
         .S8_PSLVERR     (S8_PSLVERR )
     );
+ */
 
-
-wire [31:0] gpio_in_w;
+/* wire [31:0] gpio_in_w;
 wire [31:0] gpio_out_w;
 wire [31:0] gpio_oe_w;
 
@@ -404,8 +403,8 @@ assign gpio[11] = gpio_oe_w[11] ? gpio_out_w[11] : 1'bz;
 assign gpio[12] = gpio_oe_w[12] ? gpio_out_w[12] : 1'bz;
 assign gpio[13] = gpio_oe_w[13] ? gpio_out_w[13] : 1'bz;
 assign gpio[14] = gpio_oe_w[14] ? ~gpio_out_w[14] : 1'bz;
-assign gpio[15] = gpio_oe_w[15] ? gpio_out_w[15] : 1'bz;
-
+assign gpio[15] = gpio_oe_w[15] ? gpio_out_w[15] : 1'bz; */
+/* 
 apb_gpio#(
     .APB_ADDR_WIDTH        ( 12 ),
     .PAD_NUM               ( 32 )
@@ -452,7 +451,7 @@ apb_gpio#(
         .RIN      (  1'b1       ),
         .SIN      (  uart_rx       ),
         .SOUT     (  uart_tx       )
-    );
+    ); */
 
 
   //////////////////////////////////////////////////////////////////
@@ -461,7 +460,7 @@ apb_gpio#(
   ///                                                            ///
   //////////////////////////////////////////////////////////////////
 
-  apb_spi_master
+  /* apb_spi_master
   #(
       .BUFFER_DEPTH(8)
   )
@@ -513,7 +512,7 @@ apb_gpio#(
         .PSLVERR    (S3_PSLVERR),
 
         .irq_o      ({timebCint,timebOint,timeaCint,timeaOint})
-    );
+    ); */
 
 
 

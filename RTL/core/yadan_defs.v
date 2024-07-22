@@ -48,7 +48,8 @@ SOFTWARE.
 `define NoStop                  1'b0
 `define Signed                  1'b0
 `define Unsigned                1'b1
-`define StartAdd                32'h0001008c
+// `define StartAdd                32'h0001008c
+`define StartAdd                32'h00000000
 `define INSTADD_END             32'h00018000
 
 //******    与具体指令相关的宏定义    ******//

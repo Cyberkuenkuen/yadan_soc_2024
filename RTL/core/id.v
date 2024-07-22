@@ -236,7 +236,7 @@ module id(
                         end
                         default: begin
                             
-                            instvalid       = `InstValid;
+                            instvalid       = `InstInvalid;
                         end 
                     endcase
                 end

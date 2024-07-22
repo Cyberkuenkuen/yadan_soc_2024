@@ -202,6 +202,7 @@ module yadan_riscv(
     wire[`RegBus] interrupt_data_o;
     wire[`InstAddrBus] interrupt_int_addr_o;
     wire interrupt_int_assert_o;
+    assign interrupt_int_assert_o = 0;
 
     //assign     stallreq_from_mem = ram_ce_o; 
 

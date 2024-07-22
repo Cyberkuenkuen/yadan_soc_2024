@@ -110,14 +110,26 @@ module AHB2MEM_RAM
         end
    end
    
-    dataram  u_ram
-    (
-        .addra(HADDR[15:2]),
-        .wea(byteena),
-        .clka(~HCLK),
-        .dia({data_i3,data_i2,data_i1,data_i0}),
-//        .wren(wren),
-        .doa(HRDATA)
+//     dataram  u_ram
+//     (
+//         .addra(HADDR[15:2]),
+//         .wea(byteena),
+//         .clka(~HCLK),
+//         .dia({data_i3,data_i2,data_i1,data_i0}),
+// //        .wren(wren),
+//         .doa(HRDATA)
+//     );
+
+
+    data_ram u_data_ram(
+        .clk(~HCLK),
+        .rst(HRESETn),
+        .ce(`ReadEnable),
+        .we(wren),
+        .addr(HADDR[15:2]),
+        .sel(HSIZE),
+        .data_i({data_i3,data_i2,data_i1,data_i0}),
+        .data_o((HRDATA))
     );
 
 

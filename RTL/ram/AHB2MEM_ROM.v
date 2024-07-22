@@ -119,25 +119,32 @@ module AHB2MEM_ROM
    end
 
 
-    datarom  u_rom
-    (
-        .addra(HADDR[15:2]),
-//        .wea(byteena),
-        .cea(~cs),
-        .clka(~HCLK),
-        .dia({data_i3,data_i2,data_i1,data_i0}),
-        .wea(wren),
-        .doa(data_rom_out)
+//     datarom  u_rom
+//     (
+//         .addra(HADDR[15:2]),
+// //        .wea(byteena),
+//         .cea(~cs),
+//         .clka(~HCLK),
+//         .dia({data_i3,data_i2,data_i1,data_i0}),
+//         .wea(wren),
+//         .doa(data_rom_out)
+//     );
+
+    inst_rom u_inst_rom(
+        // .clk(~HCLK),
+        .ce_i(~cs),
+        .addr_i(HADDR),
+        .inst_o(data_rom_out)
     );
 
-    boot_rom u_boot_rom
-    (
-        .doa   (  data_boot_out       ), 
-        .dia   ( {data_i3,data_i2,data_i1,data_i0}       ), 
-        .addra ( HADDR[14:2]       ), 
-        .cea   ( cs       ), 
-        .clka  (  ~HCLK      ), 
-        .wea   (  wren      )
-    );
+    // boot_rom u_boot_rom
+    // (
+    //     .doa   (  data_boot_out       ), 
+    //     .dia   ( {data_i3,data_i2,data_i1,data_i0}       ), 
+    //     .addra ( HADDR[14:2]       ), 
+    //     .cea   ( cs       ), 
+    //     .clka  (  ~HCLK      ), 
+    //     .wea   (  wren      )
+    // );
 
 endmodule
