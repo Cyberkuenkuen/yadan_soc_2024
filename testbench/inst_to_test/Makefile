@@ -22,8 +22,14 @@ CFLAGS += -O2 -static -mcmodel=medany -fvisibility=hidden -nostdlib -nostartfile
 rv32um = ./rv32um/
 rv32ui = ./rv32ui/
 
+SELECTED_S_FILE := $(rv32ui)add.S
+
+ifeq ($(MAKECMDGOALS), all)
+    SELECTED_S_FILE := $(shell python ..\iverilog\select_s_file.py)
+endif
+
 testfile+=start.S
-testfile += $(rv32ui)add.S
+testfile += $(SELECTED_S_FILE)
 testfile += $(rv32ui)riscv_test.h 
 testfile += $(rv32ui)test_macros.h
 
