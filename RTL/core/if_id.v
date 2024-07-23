@@ -35,7 +35,6 @@ module if_id(
 
     input   wire                    ex_branch_flag_i,
     input   wire[5:0]               stalled,
-    input   wire[5:0]               flush,
 
     // 对应译码阶段的信号
     output  reg[`InstAddrBus]       pc_o,

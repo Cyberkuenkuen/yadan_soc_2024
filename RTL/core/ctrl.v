@@ -39,28 +39,22 @@ module ctrl(
     output  reg                 branch_flag_o,
     output  reg[`InstAddrBus]   branch_addr_o,
 
-    output  reg[5:0]            flush_o,
     output  reg[5:0]            stalled_o
 );
 
     always @ (*) begin
             branch_flag_o   = branch_flag_i;
             branch_addr_o   = branch_addr_i;
-            // stalled_o       = 6'b000000;
-            flush_o         = 6'b000000;
 
             if (stallreq_from_mem == `Stop ) begin //&& branch_flag_i == `BranchDisable) begin  
-                // flush_o     =  6'b000100;
                 stalled_o   =  6'b011111;
             end
              else 
-            
             if (stallreq_from_ex == `Stop && branch_flag_i == `BranchDisable) begin
                 stalled_o   =  6'b001111;
             end
             else 
             if (stallreq_from_id == `Stop && branch_flag_i == `BranchDisable) begin    
-                // flush_o     =  6'b000010;
                 stalled_o   =  6'b000111;
             end 
             else if (stallreq_from_if == `Stop ) begin
@@ -68,7 +62,6 @@ module ctrl(
             end
             else begin
                 stalled_o   = 6'b000000;
-                // flush_o     = 6'b000000;
             end            
     end
 
