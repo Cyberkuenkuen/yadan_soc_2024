@@ -13,11 +13,11 @@ sim_file = './iverilog/sim_list.txt'
 ##所有错误类型
 errors = {
     "make_clean_errors": [],
-    "make_all_errors": [],
+    "make_errors": [],
     "compile_rtl_errors": [],
     "vvp_errors": [],
     "timeout_errors": [],
-    "fali_sim":[],
+    "fail_sim":[],
     "long_stay":[]
 }
 
@@ -69,17 +69,17 @@ def main():
             continue
             
 
-        # make all
-        make_all_cmd = 'make all -C ./inst_to_test'
-        make_all_process = subprocess.run(make_all_cmd, shell=True)#
+        # make batch_sim
+        make_cmd = 'make batch_sim -C ./inst_to_test'
+        make_process = subprocess.run(make_cmd, shell=True)#
         last_index = read_last_index(index_file)-1
         current_s_file = read_line_from_file(file_path, last_index)# 读当前行数对应的指令
         if current_s_file:
             print(f'\n****************{current_s_file}**************** \n')
       
-        if make_all_process.returncode != 0:
-            print('!!!Fail, make all command failed!!!')
-            errors['make_all_errors'].append(current_s_file)
+        if make_process.returncode != 0:
+            print('!!!Fail, make command failed!!!')
+            errors['make_errors'].append(current_s_file)
             continue
 
         # Compile RTL files
@@ -101,12 +101,12 @@ def main():
                 errors['vvp_errors'].append(current_s_file)
                 continue
             key = output.splitlines(False)# 将输出拆分为不带换行的字符串组
-            print(key)# key[4]对应的是输出的pass和fail以及time信息，这里为了方便改了点.v文件
+            print(key)# key[4]对应的是输出的pass和fail以及time信息，这里为了方便改了点testbench.v文件
             if(key[4] == 'pass'):
                 print('pass!!')
             elif(key[4] == 'fail'):
                 print('fail!!!')
-                errors['fali_sim'].append(current_s_file)
+                errors['fail_sim'].append(current_s_file)
             elif(key[4] == 'time'):
                 print('sim-timeout')
                 errors['timeout_errors'].append(current_s_file)
@@ -118,19 +118,32 @@ def main():
             continue
 
     print('compile_rtl_errors:',errors['compile_rtl_errors'])
-    print('make_all_errors',errors['make_all_errors'])
     print('make_clean_errors',errors['make_clean_errors'])
-    print('timeout_errors',errors['timeout_errors'])
+    print('make_errors',errors['make_errors'])
     print('vvp_errors',errors['vvp_errors'])
     print('long_stay:',errors['long_stay'])
-    print('fail_sim:',errors['fali_sim'])
-    fail_file_path = "./iverilog/fail_list.txt"    # 替换为你的输出文件路径
-    ##这里只存了long_stay的错误，可以改
-    with open(fail_file_path,'a') as f:
+    print('timeout_errors',errors['timeout_errors'])
+    print('fail_sim:',errors['fail_sim'])
+
+    fail_file_path = "./iverilog/fail_list.txt"    # 输出文件路径
+    with open(fail_file_path,'w') as f:
+        f.write('********** Compile failed: **********\n')
+        for filename in errors['make_errors']:
+            f.write(f"{filename}\n")
+
+        f.write('********** Long stay: **********\n')
         for filename in errors['long_stay']:
             f.write(f"{filename}\n")
-        print(f"错误文件已经全部导入")
 
+        f.write('********** Timeout: **********\n')
+        for filename in errors['timeout_errors']:
+            f.write(f"{filename}\n")
+        
+        f.write('********** Simulation failed: **********\n')
+        for filename in errors['fail_sim']:
+            f.write(f"{filename}\n")
+
+        print(f"Check the failed tests here: ./iverilog/fail_list.txt")
 
     return 0
 
