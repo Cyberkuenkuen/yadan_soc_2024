@@ -39,7 +39,6 @@ module ex_mem(
     input   wire[`RegBus]           ex_reg2_i,
 
     input   wire[5:0]               stalled,
-    input   wire[5:0]               flush,
 
     // 送到访存阶段的信息
     output  reg[`RegAddrBus]        mem_wd,
@@ -53,13 +52,6 @@ module ex_mem(
 
     always  @ (posedge clk or negedge rst) begin
         if (rst == `RstEnable) begin
-            mem_wd      <= `NOPRegAddr;
-            mem_wreg    <= `WriteDisable;
-            mem_wdata   <= `ZeroWord;
-            mem_aluop   <= `EXE_NONE;
-            mem_mem_addr<= `ZeroWord;
-            mem_reg2    <= `ZeroWord;
-        end else if (flush[3] == `Stop)begin
             mem_wd      <= `NOPRegAddr;
             mem_wreg    <= `WriteDisable;
             mem_wdata   <= `ZeroWord;

@@ -101,7 +101,7 @@ def main():
                 errors['vvp_errors'].append(current_s_file)
                 continue
             key = output.splitlines(False)# 将输出拆分为不带换行的字符串组
-            print(key[4])# key[4]对应的是输出的pass和fail以及time信息，这里为了方便改了点.v文件
+            print(key)# key[4]对应的是输出的pass和fail以及time信息，这里为了方便改了点.v文件
             if(key[4] == 'pass'):
                 print('pass!!')
             elif(key[4] == 'fail'):
@@ -109,7 +109,7 @@ def main():
                 errors['fali_sim'].append(current_s_file)
             elif(key[4] == 'time'):
                 print('sim-timeout')
-                errors['timeout_errors']
+                errors['timeout_errors'].append(current_s_file)
             print(output)
 
         except subprocess.TimeoutExpired:# 卡着不动的情况

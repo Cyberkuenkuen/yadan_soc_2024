@@ -58,13 +58,13 @@ module  yadan_riscv_sopc_tb();
     // initial $readmemh("inst_data3.data", u_bitty_riscv_sopc.u_data_ram.data_mem3);
 `endif
 
-  
-  
-    wire[`RegBus]  x3  =  u_yadan_riscv_sopc.u_yadan_riscv.u_regsfile.reg_r3_q;
+    wire[`RegBus]  x3  =  u_yadan_riscv_sopc.u_yadan_riscv.u_regsfile.x3_gp_w;
+    // wire[`RegBus]  x3  =  u_yadan_riscv_sopc.u_yadan_riscv.u_regsfile.reg_r3_q;
     // wire[31:0]  x3  =  u_bitty_riscv_sopc.u_bitty_riscv.u_regsfile.x3_gp_w;
 
     wire[`RegBus]  x26  =  u_yadan_riscv_sopc.u_yadan_riscv.u_regsfile.x26_s10_w;
-    wire[`RegBus]  x27 =  u_yadan_riscv_sopc.u_yadan_riscv.u_regsfile.reg_r27_q;
+    wire[`RegBus]  x27 =  u_yadan_riscv_sopc.u_yadan_riscv.u_regsfile.x27_s11_w;
+    // wire[`RegBus]  x27 =  u_yadan_riscv_sopc.u_yadan_riscv.u_regsfile.reg_r27_q;
     // wire[31:0]  x26 =  u_bitty_riscv_sopc.u_bitty_riscv.u_regsfile.regs[26];
     // wire[31:0]  x27 =  u_bitty_riscv_sopc.u_bitty_riscv.u_regsfile.regs[27];
 
@@ -78,10 +78,12 @@ module  yadan_riscv_sopc_tb();
         wait(x26 == 32'h1);     // 测试结束
         #100
         if (x27 == 32'h1) begin     // 27bit 为 1 就 ok
+            $display("pass");
             $display("********** ######### ***********");
             $display("********** test pass ***********");
             $display("********** ######### ***********");
         end else begin
+            $display("fail");
             $display("********** ######### ***********");
             $display("********** test fail ***********");
             $display("********** ######### ***********");
@@ -98,6 +100,7 @@ module  yadan_riscv_sopc_tb();
         
         #1000000
         $display("#####--Time out--#####");
+        $display("time");
 `ifdef IVERILOG
         $finish;
 `else

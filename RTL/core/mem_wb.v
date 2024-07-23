@@ -35,7 +35,6 @@ module mem_wb(
     input   wire[`RegBus]       mem_wdata,
 
     input   wire[5:0]           stalled,
-    input   wire[5:0]           flush,
 
     // 送到回写阶段的信息
     output  reg[`RegAddrBus]    wb_wd,
@@ -45,10 +44,6 @@ module mem_wb(
 
     always  @ (posedge clk or negedge rst) begin
         if (rst == `RstEnable) begin
-            wb_wd       <= `NOPRegAddr;
-            wb_wreg     <= `WriteDisable;
-            wb_wdata    <= `ZeroWord;
-        end else if (flush[4] == `Stop) begin
             wb_wd       <= `NOPRegAddr;
             wb_wreg     <= `WriteDisable;
             wb_wdata    <= `ZeroWord;

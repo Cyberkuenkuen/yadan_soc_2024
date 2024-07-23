@@ -28,7 +28,7 @@ SOFTWARE.
 module yadan_riscv(
         input   wire            clk
         ,input   wire            rst
-        ,input   wire           set_mode
+        // ,input   wire           set_mode
         ,input   wire       [`INT_BUS]   int_i
 
 
@@ -187,8 +187,6 @@ module yadan_riscv(
 
     // ctrl
     wire[5:0]               stall;  
-    wire[5:0]               flush;
-
     wire                    stallreq_from_id;
     wire                    stallreq_from_mem;
     wire                    stallreq_from_if;
@@ -211,7 +209,7 @@ module yadan_riscv(
         .clk(clk),
         .rst(rst),
         .PCchange_enable(~ram_ce_o),
-        .set_mode(set_mode),
+        // .set_mode(set_mode),
         .branch_flag_i(ctrl_branch_flag_o),
         .branch_addr_i(ctrl_branch_addr_o),
 
@@ -231,7 +229,6 @@ module yadan_riscv(
         .inst_i(rom_data_i),
         .ex_branch_flag_i(ctrl_branch_flag_o),
 
-        .flush(flush),
         .stalled(stall),
 
         .pc_o(if_id_pc_o),
@@ -328,7 +325,6 @@ module yadan_riscv(
         .ex_branch_flag_i(ctrl_branch_flag_o),
 
         .stalled(stall),
-        .flush(flush),
 
         // 传递到执行阶段 EX 模块的信息
         .ex_pc_o(ex_pc_i),
@@ -428,7 +424,6 @@ module yadan_riscv(
         .ex_reg2_i(ex_mem_reg2_o),
 
         .stalled(stall),
-        .flush(flush),
 
         // 送到访存阶段的  MEM 信息
         .mem_wd(mem_wd_i),
@@ -481,7 +476,6 @@ module yadan_riscv(
         .mem_wdata(mem_wdata_o),
 
         .stalled(stall),
-        .flush(flush),
 
         // 送到回写阶段的信息 to id/regsfile
         .wb_wd(wb_wd_i),
@@ -531,7 +525,6 @@ module yadan_riscv(
         // ctrl to pc_reg
         .branch_flag_o(ctrl_branch_flag_o),
         .branch_addr_o(ctrl_branch_addr_o),
-        .flush_o(flush),
         .stalled_o(stall)
     );
 
