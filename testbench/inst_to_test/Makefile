@@ -23,7 +23,7 @@ rv32um = ./rv32um/
 rv32ui = ./rv32ui/
 
 testfile+=start.S
-testfile += $(rv32ui)add.S
+testfile += $(rv32ui)bge.S
 testfile += $(rv32ui)riscv_test.h 
 testfile += $(rv32ui)test_macros.h
 
