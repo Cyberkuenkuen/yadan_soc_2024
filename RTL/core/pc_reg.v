@@ -29,7 +29,6 @@ module pc_reg(
     input       wire                clk,
     input       wire                rst,
     input       wire                PCchange_enable,
-    input       wire                set_mode,
 
     input       wire                branch_flag_i,
     input       wire[`RegBus]       branch_addr_i,
@@ -43,11 +42,7 @@ module pc_reg(
 
     always @(posedge clk or negedge rst) begin
         if(rst == `RstEnable) begin
-            if(set_mode) begin
-                pc_o    <=  `StartAdd;
-            end else begin
-                pc_o    <=  `ZeroWord;
-            end 
+            pc_o    <=  `StartAdd;
         end       
         else begin 
             if(branch_flag_i == `BranchEnable) begin

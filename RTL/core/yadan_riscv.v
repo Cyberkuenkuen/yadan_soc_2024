@@ -28,7 +28,7 @@ SOFTWARE.
 module yadan_riscv(
         input   wire            clk
         ,input   wire            rst
-        ,input   wire           set_mode
+        // ,input   wire           set_mode
         ,input   wire       [`INT_BUS]   int_i
 
 
@@ -211,7 +211,7 @@ module yadan_riscv(
         .clk(clk),
         .rst(rst),
         .PCchange_enable(~ram_ce_o),
-        .set_mode(set_mode),
+        // .set_mode(set_mode),
         .branch_flag_i(ctrl_branch_flag_o),
         .branch_addr_i(ctrl_branch_addr_o),
 
