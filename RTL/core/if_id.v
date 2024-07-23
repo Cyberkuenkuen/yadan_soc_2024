@@ -46,14 +46,10 @@ module if_id(
         if (rst == `RstEnable) begin
             pc_o    <= `ZeroWord;
             inst_o  <= `ZeroWord;
-        end else if (stalled[1] == `Stop && stalled[2] == `NoStop) begin
-            pc_o    <= `ZeroWord;//pc_o;
-            inst_o  <= `ZeroWord;
-        end else if (flush[1] == `Stop || ex_branch_flag_i == `BranchEnable) begin
+        end else if (ex_branch_flag_i == `BranchEnable) begin
             pc_o    <= pc_i;//`ZeroWord;
             inst_o  <= `ZeroWord;
-        end  
-        else if (stalled[1] == `NoStop) begin
+        end else if (stalled[1] == `NoStop) begin
             pc_o    <= pc_i;
             inst_o  <= inst_i;
         end
