@@ -48,7 +48,7 @@ module  yadan_riscv_sopc_tb();
     // initial $readmemh("./inst_data1.data", u_bitty_riscv_sopc.u_data_ram.data_mem1);
     // initial $readmemh("./inst_data2.data", u_bitty_riscv_sopc.u_data_ram.data_mem2);
     // initial $readmemh("./inst_data3.data", u_bitty_riscv_sopc.u_data_ram.data_mem3);
-    initial $readmemh ("./inst_rom.data", u_yadan_riscv_sopc.u_data_rom.u_inst_rom.inst_mem);
+    initial $readmemh ("./inst_to_test/inst_rom.data", u_yadan_riscv_sopc.u_data_rom.u_inst_rom.inst_mem);
 `else   // ModelSim 下
     // initial $readmemh("inst_rom.data", u_bitty_riscv_sopc.u_inst_rom.inst_mem);
     // initial $readmemh("inst_rom.data", u_bitty_riscv_sopc.u_data_ram.data_mem);
