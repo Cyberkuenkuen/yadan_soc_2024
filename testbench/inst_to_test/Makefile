@@ -24,7 +24,7 @@ rv32ui = ./rv32ui/
 
 SELECTED_S_FILE := $(rv32ui)add.S
 
-ifeq ($(MAKECMDGOALS), all)
+ifeq ($(MAKECMDGOALS), batch_sim)
     SELECTED_S_FILE := $(shell python ..\iverilog\select_s_file.py)
 endif
 
@@ -39,6 +39,7 @@ testfile += $(rv32ui)test_macros.h
 
 all: inst_rom.data simple.dump
 
+batch_sim: inst_rom.data
 
 simple.elf:
 	$(GCC) $(CFLAGS) $(testfile) -Tlink.ld -o $@  

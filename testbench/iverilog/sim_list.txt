@@ -16,16 +16,13 @@
 .\rv32ui\jalr.S
 .\rv32ui\lb.S
 .\rv32ui\lbu.S
-.\rv32ui\ld.S
 .\rv32ui\lh.S
 .\rv32ui\lhu.S
 .\rv32ui\lui.S
 .\rv32ui\lw.S
-.\rv32ui\lwu.S
 .\rv32ui\or.S
 .\rv32ui\ori.S
 .\rv32ui\sb.S
-.\rv32ui\sd.S
 .\rv32ui\sh.S
 .\rv32ui\simple.S
 .\rv32ui\sll.S
