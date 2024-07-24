@@ -7,8 +7,9 @@ import os
 
 
 sim_file = './iverilog/sim_list.txt' 
-#sim_file = '.\iverilog\fail_list.txt'
-
+#sim_file = './iverilog/fail_list.txt'
+#要测试的指令类型 :./rv32ui、/rv32um
+sim_type = 'rv32um'
 
 ##所有错误类型
 errors = {
@@ -20,6 +21,24 @@ errors = {
     "fail_sim":[],
     "long_stay":[]
 }
+
+def write_s_files_to_file(directory, output_file):
+    try:
+        # 获取目录中的所有文件名
+        filenames = os.listdir(directory)
+        
+        # 过滤出以 .S 结尾的文件
+        s_files = [filename for filename in filenames if filename.endswith('.S')]
+        
+        # 将文件名写入到输出文件中
+        with open(output_file, 'w') as f:
+            for filename in s_files:
+                f.write(f"./{sim_type}/{filename}\n")
+                
+        print(f"所有文件名已写入 {output_file}")
+        
+    except Exception as e:
+        print(f"发生错误: {e}")
 
 ##读取仿真列表中的每一行的名称
 def read_line_from_file(file_path, line_index):
@@ -48,6 +67,12 @@ def write_last_index(filename, index):
 
 
 def main():
+    ##将要仿真的.S文件写进sim_list.txt文件
+    directory_path = f"./inst_to_test/{sim_type}"  # 替换为你的目录路径
+    output_file_path = "./iverilog/sim_list.txt"    # 替换为你的输出文件路径
+    write_s_files_to_file(directory_path, output_file_path)
+
+
     file_path = sim_file  # 要读取的文件（sim_list或者fail_list）
     with open(file_path, 'r') as f:
             lines = f.readlines()
