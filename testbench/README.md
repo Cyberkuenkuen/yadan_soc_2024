@@ -46,6 +46,8 @@ python ./iverilog/test.py
 
 ### Run the testbench in Qestasim
 
+Before running the testbench, please generate the .data file. 
+
 ##### Single instruction test
 
 In the current directory (testbench):
