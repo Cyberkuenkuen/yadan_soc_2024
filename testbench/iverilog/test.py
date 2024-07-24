@@ -8,8 +8,7 @@ import os
 
 sim_file = './iverilog/sim_list.txt' 
 #sim_file = './iverilog/fail_list.txt'
-#要测试的指令类型 :./rv32ui、/rv32um
-sim_type = 'rv32um'
+
 
 ##所有错误类型
 errors = {
@@ -22,18 +21,20 @@ errors = {
     "long_stay":[]
 }
 
-def write_s_files_to_file(directory, output_file):
+def write_s_files_to_file(directory, output_file, ):
     try:
         # 获取目录中的所有文件名
-        filenames = os.listdir(directory)
-        
+        filelist = os.listdir(directory)
         # 过滤出以 .S 结尾的文件
-        s_files = [filename for filename in filenames if filename.endswith('.S')]
-        
+        sim_type = [filenames for filenames in filelist if os.path.isdir(f'./inst_to_test/{filenames}')]
+        s_files=[]
+        for seldir in sim_type:
+            s_list = os.listdir(f'./inst_to_test/{seldir}')
+            s_files += [f'./{seldir}/{filename}' for filename in s_list if filename.endswith('.S')]
         # 将文件名写入到输出文件中
         with open(output_file, 'w') as f:
             for filename in s_files:
-                f.write(f"./{sim_type}/{filename}\n")
+                f.write(f"{filename}\n")
                 
         print(f"所有文件名已写入 {output_file}")
         
@@ -68,7 +69,7 @@ def write_last_index(filename, index):
 
 def main():
     ##将要仿真的.S文件写进sim_list.txt文件
-    directory_path = f"./inst_to_test/{sim_type}"  # 替换为你的目录路径
+    directory_path = f"./inst_to_test"  # 替换为你的目录路径
     output_file_path = "./iverilog/sim_list.txt"    # 替换为你的输出文件路径
     write_s_files_to_file(directory_path, output_file_path)
 
