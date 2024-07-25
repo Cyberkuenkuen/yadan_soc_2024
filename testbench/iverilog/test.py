@@ -119,7 +119,7 @@ def main():
         # vvp
         vvp_cmd = ['vvp', 'yadan_riscv_sopc_tb.vvp']
         try:
-            process = subprocess.run(vvp_cmd, timeout=2, stdout=subprocess.PIPE ,text=True)
+            process = subprocess.run(vvp_cmd, timeout=5, stdout=subprocess.PIPE ,text=True)
             output = process.stdout# 读vvp后的输出
 
             if process.returncode != 0:

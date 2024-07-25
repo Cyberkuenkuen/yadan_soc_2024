@@ -75,7 +75,7 @@ python ./questasim/testque.py
 
  After running, check the failed tests here: ./tempfile_sim/fail_list_que.txt
 
- #### Clearing temporary files
+ ## Clearing temporary files
 
 The simulation generates a series of temporary files:
 
