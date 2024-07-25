@@ -68,6 +68,8 @@ def write_last_index(filename, index):
 
 
 def main():
+    ##新建一个存放临时文件的目录
+    os.makedirs(r'./tempfile_sim', exist_ok=True)
     ##将要仿真的.S文件写进sim_list.txt文件
     directory_path = f"./inst_to_test"  # 替换为你的目录路径
     output_file_path = "./tempfile_sim/sim_list.txt"    # 替换为你的输出文件路径
@@ -85,9 +87,8 @@ def main():
     for i in range(len(lines)):
 
         # make clean
-        print("---------------------------------------------------------check---------------------------------------------------------")
         make_clean_cmd = 'make clean -C ./inst_to_test'
-        make_clean_process = subprocess.run(make_clean_cmd, shell=True)#运行make clean
+        make_clean_process = subprocess.run(make_clean_cmd,  stdout=subprocess.DEVNULL, shell=True)#运行make clean
         if make_clean_process.returncode != 0:
             print('!!!Fail, make clean command failed!!!')
             errors['make_clean_errors'].append(current_s_file)
@@ -96,7 +97,7 @@ def main():
 
         # make batch_sim
         make_cmd = 'make batch_sim -C ./inst_to_test'
-        make_process = subprocess.run(make_cmd, shell=True)#
+        make_process = subprocess.run(make_cmd, stdout=subprocess.DEVNULL, shell=True)#
         last_index = read_last_index(index_file)-1
         current_s_file = read_line_from_file(file_path, last_index)# 读当前行数对应的指令
         if current_s_file:
@@ -109,7 +110,7 @@ def main():
 
         # Compile RTL files
         compile_cmd = 'python ./iverilog/compile_rtl.py'
-        compile_process = subprocess.run(compile_cmd, shell=True)
+        compile_process = subprocess.run(compile_cmd,  stdout=subprocess.DEVNULL, shell=True)
         if compile_process.returncode != 0:
             print('!!!Fail, compile_rtl command failed!!!')
             errors['compile_rtl_errors'].append(current_s_file)
@@ -126,7 +127,7 @@ def main():
                 errors['vvp_errors'].append(current_s_file)
                 continue
             key = output.splitlines(False)# 将输出拆分为不带换行的字符串组
-            print(key)# key[4]对应的是输出的pass和fail以及time信息，这里为了方便改了点testbench.v文件
+            # print(key)# key[4]对应的是输出的pass和fail以及time信息，这里为了方便改了点testbench.v文件
             if(key[4] == 'pass'):
                 print('pass!!')
             elif(key[4] == 'fail'):
@@ -135,7 +136,7 @@ def main():
             elif(key[4] == 'time'):
                 print('sim-timeout')
                 errors['timeout_errors'].append(current_s_file)
-            print(output)
+            # print(output)
 
         except subprocess.TimeoutExpired:# 卡着不动的情况
             print('!!!Fail, vvp exec timeout!!!')

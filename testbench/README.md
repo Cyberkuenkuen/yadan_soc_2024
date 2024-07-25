@@ -75,3 +75,14 @@ python ./questasim/testque.py
 
  After running, check the failed tests here: ./tempfile_sim/fail_list_que.txt
 
+ #### Clearing temporary files
+
+The simulation generates a series of temporary files:
+
+ e.g. . \tempfile_sim\sim_list, . \tempfile_sim\last_index, . \work\... etc.
+
+So, after finishing the simulation, you can use the following command to clear the unnecessary temporary files:
+
+```
+python clean.py
+```
