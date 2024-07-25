@@ -42,7 +42,7 @@ In the current directory (testbench):
 python ./iverilog/test.py
 ```
 
- After running, check the failed tests here: ./iverilog/fail_list.txt
+ After running, check the failed tests here: ./tempfile_sim/fail_list_ive.txt
 
 ### Run the testbench in Qestasim
 
@@ -65,5 +65,13 @@ If the test is successful, the program will print “test pass”.
 
 ##### Batch simulation
 
-..to be updated
+You can also test all instructions in once by running the batch simulation.
+
+In the current directory (testbench):
+
+```
+python ./questasim/testque.py
+```
+
+ After running, check the failed tests here: ./tempfile_sim/fail_list_que.txt
 

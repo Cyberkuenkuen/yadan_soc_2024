@@ -78,10 +78,12 @@ module  yadan_riscv_sopc_tb();
         wait(x26 == 32'h1);     // 测试结束
         #100
         if (x27 == 32'h1) begin     // 27bit 为 1 就 ok
+            $display("pass");
             $display("********** ######### ***********");
             $display("********** test pass ***********");
             $display("********** ######### ***********");
         end else begin
+            $display("fail");
             $display("********** ######### ***********");
             $display("********** test fail ***********");
             $display("********** ######### ***********");
@@ -98,6 +100,7 @@ module  yadan_riscv_sopc_tb();
         
         #1000000
         $display("#####--Time out--#####");
+        $display("time");
 `ifdef IVERILOG
         $finish;
 `else
