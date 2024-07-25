@@ -3,11 +3,12 @@ import subprocess
 import os
 import shutil
 
+##要清除的目录
 clean_dirs = {
 r"./work",
 r"./tempfile_sim"
 }
-
+##要清除的文件
 clean_files = {
 r"./yadan_riscv_sopc_tb.vcd",
 r"./yadan_riscv_sopc_tb.vvp",
@@ -27,7 +28,7 @@ def main():
     for dir in clean_dirs :
         if(os.path.exists(dir)):
             shutil.rmtree(dir) 
-    print('清空完成')
+    print('Clearance complete')
     return 0
 
 if __name__ == '__main__':

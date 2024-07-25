@@ -28,11 +28,11 @@ def write_last_index(filename, index):
 
 def main():
     
-     index_file = os.path.join(r'..\tempfile_sim\last_index.txt')
+     index_file = os.path.join(r'../tempfile_sim/last_index.txt')
      last_index = read_last_index(index_file)
      next_index = (last_index + 1)
      write_last_index(index_file, next_index)
-     file_path = r'..\tempfile_sim\sim_list.txt'   # 要读取的文件
+     file_path = r'../tempfile_sim/sim_list.txt'   # 要读取的文件
      line_index = last_index  # 要读取的行索引（例如，读取第3行内容，索引从0开始）
      line_content = read_line_from_file(file_path, line_index)
      print(line_content)
