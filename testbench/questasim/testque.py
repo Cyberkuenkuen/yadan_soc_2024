@@ -68,7 +68,10 @@ def write_last_index(filename, index):
 
 
 def main():
+    ##新建一个存放临时文件的目录
+    os.makedirs(r'./tempfile_sim', exist_ok=True)
     ##将要仿真的.S文件写进sim_list.txt文件
+
     directory_path = r"./inst_to_test"  # 替换为你的目录路径
     output_file_path = r"./tempfile_sim/sim_list.txt"    # 替换为你的输出文件路径
     write_s_files_to_file(directory_path, output_file_path)
@@ -81,14 +84,14 @@ def main():
     write_last_index(index_file, 0)#初始化
     last_index = read_last_index(index_file)#读行数
     current_s_file = read_line_from_file(file_path, last_index)#当前行数对应的 指令名称.S
+    vsim_cmd = 'vsim -c -64 -do ./questasim/simulation.tcl'
+    subprocess.run(vsim_cmd, stdout=subprocess.PIPE, input='exit\n', text=True)
 
-    
     for i in range(len(lines)):
 
         # make clean
-        print("---------------------------------------------------------check---------------------------------------------------------")
         make_clean_cmd = 'make clean -C ./inst_to_test'
-        make_clean_process = subprocess.run(make_clean_cmd, shell=True)#运行make clean
+        make_clean_process = subprocess.run(make_clean_cmd, stdout=subprocess.DEVNULL, shell=True)#运行make clean
         if make_clean_process.returncode != 0:
             print('!!!Fail, make clean command failed!!!')
             errors['make_clean_errors'].append(current_s_file)
@@ -97,7 +100,7 @@ def main():
 
         # make batch_sim
         make_cmd = 'make batch_sim -C ./inst_to_test'
-        make_process = subprocess.run(make_cmd, shell=True)#
+        make_process = subprocess.run(make_cmd, stdout=subprocess.DEVNULL, shell=True)#
         last_index = read_last_index(index_file)-1
         current_s_file = read_line_from_file(file_path, last_index)# 读当前行数对应的指令
         if current_s_file:
@@ -117,7 +120,7 @@ def main():
         #     continue
 
         # vsim
-        vsim_cmd = 'vsim -c -64 -do ./questasim/simulation.tcl'
+        vsim_cmd = 'vsim -c -64 -do ./questasim/run_sim.tcl'
         try:
             process = subprocess.run(vsim_cmd, timeout=10, stdout=subprocess.PIPE ,text=True)
             output = process.stdout# 读vsim后的输出
@@ -157,6 +160,7 @@ def main():
         f.write('********** Compile failed: **********\n')
         for filename in errors['make_errors']:
             f.write(f"{filename}\n")
+
 
         f.write('********** Long stay: **********\n')
         for filename in errors['long_stay']:
