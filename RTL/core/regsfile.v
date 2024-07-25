@@ -55,12 +55,12 @@ module regsfile
 
     //write
     wire [`RegNum-1:0] we_Q;     //单个register写使能
-    assign we_Q[0] = 1'b0;       //RV32I架构规定reg0的值只能为0，所以不能写入
+    assign we_Q[0] = `WriteDisable;       //RV32I架构规定reg0的值只能为0，所以不能写入
 
     genvar i;
     generate
         for(i=1; i < `RegNum; i=i+1) begin
-            assign we_Q[i] = (i == waddr_i) ? 1'b1 : 1'b0;
+            assign we_Q[i] = (i == waddr_i) ? `WriteEnable : `WriteDisable;
         end
     endgenerate
 
@@ -68,7 +68,7 @@ module regsfile
         for(i=0; i < `RegNum; i=i+1) begin
             always @(posedge clk or negedge rst) begin
                 if(rst == `RstEnable)
-                    reg_Q[i] <= 32'h00000000;
+                    reg_Q[i] <= `ZeroWord;
                 else if(we_Q[i] && (we_i == `WriteEnable)) 
                     reg_Q[i] <= wdata_i;
             end
