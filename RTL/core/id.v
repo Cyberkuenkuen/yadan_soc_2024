@@ -62,7 +62,7 @@ module id(
     // output execution
     output  wire                    stallreq,
 
-    output  wire[`InstAddrBus]       pc_o,
+    output  wire[`InstAddrBus]      pc_o,
     output  reg[`InstBus]           inst_o,
     output  reg[`AluOpBus]          aluop_o,
     output  reg[`AluSelBus]         alusel_o,

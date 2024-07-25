@@ -4,14 +4,14 @@ import os
 import shutil
 
 clean_dirs = {
-r".\work",
-r".\tempfile_sim"
+r"./work",
+r"./tempfile_sim"
 }
 
 clean_files = {
-r".\yadan_riscv_sopc_tb.vcd",
-r".\yadan_riscv_sopc_tb.vvp",
-r".\transcript"
+r"./yadan_riscv_sopc_tb.vcd",
+r"./yadan_riscv_sopc_tb.vvp",
+r"./transcript"
 }
 
 def main():
