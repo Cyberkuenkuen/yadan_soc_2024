@@ -36,7 +36,7 @@ def write_s_files_to_file(directory, output_file, ):
             for filename in s_files:
                 f.write(f"{filename}\n")
                 
-        print(f"所有文件名已写入 {output_file}")
+        print(f"All .S files have been written in {output_file}")
         
     except Exception as e:
         print(f"发生错误: {e}")
