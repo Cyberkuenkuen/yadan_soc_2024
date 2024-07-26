@@ -25,7 +25,7 @@ rv32ui = ./rv32ui/
 SELECTED_S_FILE := $(rv32ui)add.S
 
 ifeq ($(MAKECMDGOALS), batch_sim)
-    SELECTED_S_FILE := $(shell python ..\iverilog\select_s_file.py)
+    SELECTED_S_FILE := $(shell python ../iverilog/select_s_file.py)
 endif
 
 testfile+=start.S
