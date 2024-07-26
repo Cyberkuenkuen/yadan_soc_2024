@@ -80,7 +80,7 @@ python ./questasim/testque.py
 
 The simulation generates a series of temporary files:
 
-  \tempfile_sim\sim_list, . \tempfile_sim\last_index, . \work\... etc.
+  ./tempfile_simsim_list, ./tempfile_sim/last_index, ./work/... etc.
 
 To delete them:
 
