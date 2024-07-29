@@ -104,6 +104,5 @@ module id_ex(
             end // else 执行阶段和访存阶段均停顿，保持不变
         end
     end
-        
-
+    
 endmodule // id_ex
