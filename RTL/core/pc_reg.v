@@ -32,7 +32,7 @@ module pc_reg(
 
     input       wire                branch_flag_i,
     input       wire[`RegBus]       branch_addr_i,
-    input       wire[5:0]           stalled,
+    input       wire[4:0]           stalled,
 
     output      reg[`InstAddrBus]   pc_o,
     output      wire                ce_o 

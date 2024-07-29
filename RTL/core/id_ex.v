@@ -44,7 +44,7 @@ module id_ex(
 
     input   wire                ex_branch_flag_i,
     
-    input   wire[5:0]           stalled,
+    input   wire[4:0]           stalled,
 
 
     // 传递到执行段的信息
@@ -74,19 +74,9 @@ module id_ex(
             ex_wcsr_reg     <= `WriteDisable;
             ex_csr_reg      <= `ZeroWord;
             ex_wd_csr_reg   <= `ZeroWord;
-        end else if((stalled[2] == `Stop) && (stalled[3] == `NoStop)) begin
-                ex_inst_o       <= `ZeroWord;
-                ex_pc_o         <= `ZeroWord;
-                ex_aluop        <= `EXE_NONE;
-                ex_alusel       <= `EXE_RES_NONE;
-                ex_reg1         <= `ZeroWord;
-                ex_reg2         <= `ZeroWord;
-                ex_wd           <= `NOPRegAddr;
-                ex_wreg         <= `WriteDisable;
-                ex_wcsr_reg     <= `WriteDisable;
-                ex_csr_reg      <= `ZeroWord;
-                ex_wd_csr_reg   <= `ZeroWord;
-        end else if (stalled[2] == `NoStop) begin
+        end else begin
+            // 执行阶段不停顿，正常传递
+            if (stalled[2] == `NoStop) begin
                 ex_pc_o         <= id_pc_i;
                 ex_inst_o       <= id_inst_i;
                 ex_aluop        <= id_aluop;
@@ -98,19 +88,20 @@ module id_ex(
                 ex_wcsr_reg     <= id_wcsr_reg;
                 ex_csr_reg      <= id_csr_reg;
                 ex_wd_csr_reg   <= id_wd_csr_reg;
-        end
-        else begin
-                ex_pc_o         <=  ex_pc_o       ;
-                ex_inst_o       <=  ex_inst_o     ;
-                ex_aluop        <=  ex_aluop      ;
-                ex_alusel       <=  ex_alusel     ;
-                ex_reg1         <=  ex_reg1       ;
-                ex_reg2         <=  ex_reg2       ;
-                ex_wd           <=  ex_wd         ;
-                ex_wreg         <=  ex_wreg       ;
-                ex_wcsr_reg     <=  ex_wcsr_reg   ;
-                ex_csr_reg      <=  ex_csr_reg    ;
-                ex_wd_csr_reg   <=  ex_wd_csr_reg ;
+            // 执行阶段停顿，访存阶段不停顿，清空执行阶段所有信号
+            end else if(stalled[3] == `NoStop) begin
+                ex_inst_o       <= `ZeroWord;
+                ex_pc_o         <= `ZeroWord;
+                ex_aluop        <= `EXE_NONE;
+                ex_alusel       <= `EXE_RES_NONE;
+                ex_reg1         <= `ZeroWord;
+                ex_reg2         <= `ZeroWord;
+                ex_wd           <= `NOPRegAddr;
+                ex_wreg         <= `WriteDisable;
+                ex_wcsr_reg     <= `WriteDisable;
+                ex_csr_reg      <= `ZeroWord;
+                ex_wd_csr_reg   <= `ZeroWord;
+            end // else 执行阶段和访存阶段均停顿，保持不变
         end
     end
         

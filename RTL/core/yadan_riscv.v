@@ -186,7 +186,7 @@ module yadan_riscv(
     wire[`RegBus]           reg2_data_o;
 
     // ctrl
-    wire[5:0]               stall;  
+    wire[4:0]               stall;  
     wire                    stallreq_from_id;
     wire                    stallreq_from_mem;
     wire                    stallreq_from_if;
