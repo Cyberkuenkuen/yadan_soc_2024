@@ -73,7 +73,7 @@ module ex_mem(
                 mem_aluop   <= `EXE_NONE;
                 mem_mem_addr<= `ZeroWord;
                 mem_reg2    <= `ZeroWord;
-            end
+            end //else 保持不变
         end
     end
     

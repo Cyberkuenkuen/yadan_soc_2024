@@ -249,7 +249,7 @@ module ex(
 
     // branch 
     always @ (*) begin
-        branch_flag     = `BranchDisable
+        branch_flag     = `BranchDisable;
         branch_addr     = `ZeroWord;
         branchres       = `ZeroWord;
         case (aluop_i)

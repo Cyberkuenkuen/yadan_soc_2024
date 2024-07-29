@@ -42,26 +42,20 @@ module ctrl(
     output  reg[4:0]            stalled_o
 );
 
-    always @ (*) begin
+    always @(*) begin
             branch_flag_o   = branch_flag_i;
             branch_addr_o   = branch_addr_i;
 
             if (stallreq_from_mem == `Stop ) begin //&& branch_flag_i == `BranchDisable) begin  
                 stalled_o   =  5'b11111;
-            end
-             else 
-            if (stallreq_from_ex == `Stop && branch_flag_i == `BranchDisable) begin
+            end else if (stallreq_from_ex == `Stop) begin
                 stalled_o   =  5'b01111;
-            end
-            else 
-            if (stallreq_from_id == `Stop && branch_flag_i == `BranchDisable) begin    
+            end else if (stallreq_from_id == `Stop) begin    
                 stalled_o   =  5'b00111;
-            end 
-            else if (stallreq_from_if == `Stop ) begin
+            end else if (stallreq_from_if == `Stop && branch_flag_i == `BranchDisable) begin
                 stalled_o   =  5'b00111;
-            end
-            else begin
-                stalled_o   = 5'b00000;
+            end else begin
+                stalled_o   =  5'b00000;
             end            
     end
 

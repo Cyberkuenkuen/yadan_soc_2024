@@ -164,8 +164,7 @@ module id(
 
     //*******   对指令译码    *******//
     always @ (*) begin
-        // if (rst == `RstEnable || (ex_branch_flag_i == `BranchEnable && inst_i != `ZeroWord)) begin
-        if (ex_branch_flag_i == `BranchEnable && inst_i != `ZeroWord) begin
+        if (ex_branch_flag_i == `BranchEnable) begin
             aluop_o         = `EXE_NONE;
             alusel_o        = `EXE_RES_NONE;
             reg_wd_o        = `NOPRegAddr;
