@@ -14,6 +14,9 @@ To change the test program for the simulation, check the file ./inst_to_test/Mak
 SELECTED_S_FILE := $(rv32ui)add.S
 ```
 
+Test programs are from https://github.com/riscv-software-src/riscv-tests/tree/master/isa
+
+
 ## Run the testbench in Icarus Verilog
 
 #### Single instruction test
