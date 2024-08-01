@@ -52,6 +52,8 @@ module if_id(
             end else if (stalled[1] == `NoStop) begin
                 pc_o    <= pc_i;
                 inst_o  <= inst_i;
+            end else if (stalled[2] == `NoStop) begin
+                inst_o  <= `ZeroWord;
             end //else 保持不变
         end
     end

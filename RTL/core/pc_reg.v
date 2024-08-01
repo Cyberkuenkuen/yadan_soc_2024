@@ -44,14 +44,12 @@ module pc_reg(
         if(rst == `RstEnable) begin
             pc_o    <=  `StartAdd;
         end       
-        else begin 
-            // if(PCchange_enable == `ReadDisable) begin
-            //     pc_o    <=  pc_o;
-            // end else 
-            if(stalled[0] == `NoStop) begin
-                if(branch_flag_i == `BranchEnable) begin
+        else begin
+            if(branch_flag_i == `BranchEnable) begin
                     pc_o    <= branch_addr_i;
-                end else if(pc_o < `INSTADD_END) begin
+            // 优先根据跳转信号更新pc，如果在取指阶段发生流水线停顿，跳转信号不会因此丢失
+            end else if(stalled[0] == `NoStop) begin
+                if(pc_o < `INSTADD_END) begin
                     pc_o  <= pc_o + 4'h4;
                 end else begin
                     pc_o  <=  `StartAdd;

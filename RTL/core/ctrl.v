@@ -43,20 +43,20 @@ module ctrl(
 );
 
     always @(*) begin
-            branch_flag_o   = branch_flag_i;
-            branch_addr_o   = branch_addr_i;
+        branch_flag_o   = branch_flag_i;
+        branch_addr_o   = branch_addr_i;
 
-            if (stallreq_from_mem == `Stop ) begin //&& branch_flag_i == `BranchDisable) begin  
-                stalled_o   =  5'b11111;
-            end else if (stallreq_from_ex == `Stop) begin
-                stalled_o   =  5'b01111;
-            end else if (stallreq_from_id == `Stop) begin    
-                stalled_o   =  5'b00111;
-            end else if (stallreq_from_if == `Stop && branch_flag_i == `BranchDisable) begin
-                stalled_o   =  5'b00111;
-            end else begin
-                stalled_o   =  5'b00000;
-            end            
+        if (stallreq_from_mem == `Stop ) begin //&& branch_flag_i == `BranchDisable) begin  
+            stalled_o   =  5'b11111;
+        end else if (stallreq_from_ex == `Stop) begin
+            stalled_o   =  5'b01111;
+        end else if (stallreq_from_id == `Stop) begin    
+            stalled_o   =  5'b00111;
+        end else if (stallreq_from_if == `Stop) begin   // && branch_flag_i == `BranchDisable
+            stalled_o   =  5'b00011;
+        end else begin
+            stalled_o   =  5'b00000;
+        end            
     end
 
 endmodule // ctrl

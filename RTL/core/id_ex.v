@@ -75,7 +75,7 @@ module id_ex(
             ex_csr_reg      <= `ZeroWord;
             ex_wd_csr_reg   <= `ZeroWord;
         end else begin
-            // 执行阶段不停顿，正常传递
+            // 不停顿，正常传递
             if (stalled[2] == `NoStop) begin
                 ex_pc_o         <= id_pc_i;
                 ex_inst_o       <= id_inst_i;
@@ -88,7 +88,7 @@ module id_ex(
                 ex_wcsr_reg     <= id_wcsr_reg;
                 ex_csr_reg      <= id_csr_reg;
                 ex_wd_csr_reg   <= id_wd_csr_reg;
-            // 执行阶段停顿，访存阶段不停顿，清空执行阶段所有信号
+            // 停顿，同时执行阶段不停顿，清空所有译码结果
             end else if(stalled[3] == `NoStop) begin
                 ex_inst_o       <= `ZeroWord;
                 ex_pc_o         <= `ZeroWord;
@@ -101,7 +101,7 @@ module id_ex(
                 ex_wcsr_reg     <= `WriteDisable;
                 ex_csr_reg      <= `ZeroWord;
                 ex_wd_csr_reg   <= `ZeroWord;
-            end // else 执行阶段和访存阶段均停顿，保持不变
+            end // else 译码阶段和执行阶段均停顿，保持不变
         end
     end
     
