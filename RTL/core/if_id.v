@@ -34,7 +34,7 @@ module if_id(
     input   wire[`InstBus]          inst_i,
 
     input   wire                    ex_branch_flag_i,
-    input   wire[5:0]               stalled,
+    input   wire[4:0]               stalled,
 
     // 对应译码阶段的信号
     output  reg[`InstAddrBus]       pc_o,
@@ -45,12 +45,16 @@ module if_id(
         if (rst == `RstEnable) begin
             pc_o    <= `ZeroWord;
             inst_o  <= `ZeroWord;
-        end else if (ex_branch_flag_i == `BranchEnable) begin
-            pc_o    <= pc_i;//`ZeroWord;
-            inst_o  <= `ZeroWord;
-        end else if (stalled[1] == `NoStop) begin
-            pc_o    <= pc_i;
-            inst_o  <= inst_i;
+        end else begin
+            if (ex_branch_flag_i == `BranchEnable) begin
+                pc_o    <= pc_i;
+                inst_o  <= `ZeroWord;
+            end else if (stalled[1] == `NoStop) begin
+                pc_o    <= pc_i;
+                inst_o  <= inst_i;
+            end else if (stalled[2] == `NoStop) begin
+                inst_o  <= `ZeroWord;
+            end //else 保持不变
         end
     end
 

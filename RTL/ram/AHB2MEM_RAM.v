@@ -114,10 +114,10 @@ module AHB2MEM_RAM
         .rst(HRESETn),
         .ce(`ReadEnable),
         .we(wren),
-        .addr(HADDR[15:2]),
+        .addr(HADDR),
         .sel(HSIZE),
-        .data_i({data_i3,data_i2,data_i1,data_i0}),
-        .data_o((HRDATA))
+        .data_i(HWDATA),
+        .data_o(HRDATA)
     );
 
 

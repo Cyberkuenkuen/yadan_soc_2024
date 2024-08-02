@@ -39,30 +39,24 @@ module ctrl(
     output  reg                 branch_flag_o,
     output  reg[`InstAddrBus]   branch_addr_o,
 
-    output  reg[5:0]            stalled_o
+    output  reg[4:0]            stalled_o
 );
 
-    always @ (*) begin
-            branch_flag_o   = branch_flag_i;
-            branch_addr_o   = branch_addr_i;
+    always @(*) begin
+        branch_flag_o   = branch_flag_i;
+        branch_addr_o   = branch_addr_i;
 
-            if (stallreq_from_mem == `Stop ) begin //&& branch_flag_i == `BranchDisable) begin  
-                stalled_o   =  6'b011111;
-            end
-             else 
-            if (stallreq_from_ex == `Stop && branch_flag_i == `BranchDisable) begin
-                stalled_o   =  6'b001111;
-            end
-            else 
-            if (stallreq_from_id == `Stop && branch_flag_i == `BranchDisable) begin    
-                stalled_o   =  6'b000111;
-            end 
-            else if (stallreq_from_if == `Stop ) begin
-                stalled_o   =  6'b000111;
-            end
-            else begin
-                stalled_o   = 6'b000000;
-            end            
+        if (stallreq_from_mem == `Stop ) begin //&& branch_flag_i == `BranchDisable) begin  
+            stalled_o   =  5'b11111;
+        end else if (stallreq_from_ex == `Stop) begin
+            stalled_o   =  5'b01111;
+        end else if (stallreq_from_id == `Stop) begin    
+            stalled_o   =  5'b00111;
+        end else if (stallreq_from_if == `Stop) begin   // && branch_flag_i == `BranchDisable
+            stalled_o   =  5'b00011;
+        end else begin
+            stalled_o   =  5'b00000;
+        end            
     end
 
 endmodule // ctrl
