@@ -25,7 +25,7 @@ SOFTWARE.
 
 `include "yadan_defs.v"
 
-module cpu_ahb_mem (,
+module cpu_ahb_mem (
     input   wire                clk,
     input   wire                rst,
 
@@ -74,7 +74,7 @@ module cpu_ahb_mem (,
     always @(*) begin   
         case(state)
             IDLE:       nxt_state = cpu_ce_i ? WAIT : IDLE;
-            WAIT:       nxt_state = cpu_ce_i ? (M_HGRANT ? CONTROL : WAIT) : IDLE
+            WAIT:       nxt_state = cpu_ce_i ? (M_HGRANT ? CONTROL : WAIT) : IDLE;
             CONTROL:    nxt_state = cpu_ce_i ? ENDS : IDLE;
             ENDS:       nxt_state = cpu_ce_i ? (M_HREADY ? ENDS : IDLE) : IDLE;
         endcase

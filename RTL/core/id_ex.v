@@ -75,8 +75,20 @@ module id_ex(
             ex_csr_reg      <= `ZeroWord;
             ex_wd_csr_reg   <= `ZeroWord;
         end else begin
+            if (ex_branch_flag_i == `BranchEnable) begin
+                ex_inst_o       <= `ZeroWord;
+                ex_pc_o         <= `ZeroWord;
+                ex_aluop        <= `EXE_NONE;
+                ex_alusel       <= `EXE_RES_NONE;
+                ex_reg1         <= `ZeroWord;
+                ex_reg2         <= `ZeroWord;
+                ex_wd           <= `NOPRegAddr;
+                ex_wreg         <= `WriteDisable;
+                ex_wcsr_reg     <= `WriteDisable;
+                ex_csr_reg      <= `ZeroWord;
+                ex_wd_csr_reg   <= `ZeroWord;
             // 不停顿，正常传递
-            if (stalled[2] == `NoStop) begin
+            end else if (stalled[2] == `NoStop) begin
                 ex_pc_o         <= id_pc_i;
                 ex_inst_o       <= id_inst_i;
                 ex_aluop        <= id_aluop;
