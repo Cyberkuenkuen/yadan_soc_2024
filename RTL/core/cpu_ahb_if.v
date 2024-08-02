@@ -73,7 +73,7 @@ module cpu_ahb_if (
     always @(*) begin   
         case(state)
             IDLE:       nxt_state = cpu_ce_i ? WAIT : IDLE;
-            WAIT:       nxt_state = cpu_ce_i ? (M_HGRANT ? CONTROL : WAIT) : IDLE
+            WAIT:       nxt_state = cpu_ce_i ? (M_HGRANT ? CONTROL : WAIT) : IDLE;
             CONTROL:    nxt_state = cpu_ce_i ? ENDS : IDLE;
             ENDS:       nxt_state = cpu_ce_i ? ENDS : IDLE;
         endcase
