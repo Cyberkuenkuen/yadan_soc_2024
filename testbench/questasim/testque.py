@@ -127,7 +127,7 @@ def main():
 
             if process.returncode != 0:
                 print('!!!Fail, vsim command failed!!!')
-                errors['vvp_errors'].append(current_s_file)
+                errors['vsim_errors'].append(current_s_file)
                 continue
             key = output.splitlines(False)# 将输出拆分为不带换行的字符串组
             # print(output)# key[4]对应的是输出的pass和fail以及time信息，这里为了方便改了点testbench.v文件
