@@ -26,8 +26,6 @@ SOFTWARE.
 `include "yadan_defs.v"
 
 module ex(
-    input   wire            rst,
-
     // from id/ex 译码阶段送到执行阶段的信息
     input   wire[`InstAddrBus]  ex_pc,
     input   wire[`InstBus]      ex_inst,
@@ -44,7 +42,7 @@ module ex(
     //from mul/div
     
     input   wire[`DoubleRegBus] muldiv_result_i,
-    input   wire                muldiv_done,
+    input   wire                muldiv_done_i,
     // input   wire[`RegAddrBus]   div_reg_waddr_i,
 
     input wire                  int_assert_i,                // 中断发生标志
@@ -54,7 +52,7 @@ module ex(
     output  reg                 muldiv_start_o,
     output  reg[`RegBus]        muldiv_dividend_o,
     output  reg[`RegBus]        muldiv_divisor_o,
-    output  reg                 mul_or_div,
+    output  reg                 mul_or_div_o,
     output  reg                 muldiv_reg1_signed0_unsigned1,
     output  reg                 muldiv_reg2_signed0_unsigned1,
 
@@ -106,9 +104,9 @@ module ex(
 
     //arith
     always @(*) begin
-        if (muldiv_done) begin   // mul/div 运算结束
+        if (muldiv_done_i) begin   // mul/div 运算结束
             muldiv_start_o                  =  1'b0;
-            mul_or_div                      =  `MUL;
+            mul_or_div_o                    =  `MUL;
             muldiv_dividend_o               =  `ZeroWord;
             muldiv_divisor_o                =  `ZeroWord;
             muldiv_reg1_signed0_unsigned1   = `Unsigned;
@@ -133,7 +131,7 @@ module ex(
         end else begin     //mul/div 没有运行或没有运行结束
             arithresult                     = `ZeroWord;
             muldiv_start_o                  =  1'b0;
-            mul_or_div                      =  `MUL;
+            mul_or_div_o                    =  `MUL;
             muldiv_dividend_o               =  `ZeroWord;
             muldiv_divisor_o                =  `ZeroWord;
             muldiv_reg1_signed0_unsigned1   = `Unsigned;
@@ -141,7 +139,7 @@ module ex(
             case (aluop_i)
                 `EXE_DIV,`EXE_REM  : begin
                     muldiv_start_o                  =  1'b1;
-                    mul_or_div                      =  `DIV;
+                    mul_or_div_o                    =  `DIV;
                     muldiv_dividend_o               =  reg1_i;
                     muldiv_divisor_o                =  reg2_i;
                     muldiv_reg1_signed0_unsigned1   = `Signed;
@@ -149,7 +147,7 @@ module ex(
                 end
                 `EXE_DIVU,`EXE_REMU : begin
                     muldiv_start_o                  =  1'b1;
-                    mul_or_div                      =  `DIV;
+                    mul_or_div_o                    =  `DIV;
                     muldiv_dividend_o               =  reg1_i;
                     muldiv_divisor_o                =  reg2_i;
                     muldiv_reg1_signed0_unsigned1   = `Unsigned;
@@ -157,7 +155,7 @@ module ex(
                 end
                 `EXE_MUL,`EXE_MULHU  : begin
                     muldiv_start_o                  =  1'b1;
-                    mul_or_div                      =  `MUL;
+                    mul_or_div_o                    =  `MUL;
                     muldiv_dividend_o               =  reg1_i;
                     muldiv_divisor_o                =  reg2_i;
                     muldiv_reg1_signed0_unsigned1   = `Unsigned;
@@ -165,7 +163,7 @@ module ex(
                 end
                 `EXE_MULH:  begin
                     muldiv_start_o                  =  1'b1;
-                    mul_or_div                      =  `MUL;
+                    mul_or_div_o                    =  `MUL;
                     muldiv_dividend_o               =  reg1_i;
                     muldiv_divisor_o                =  reg2_i;
                     muldiv_reg1_signed0_unsigned1   = `Signed;
@@ -173,7 +171,7 @@ module ex(
                 end
                 `EXE_MULHSU: begin
                     muldiv_start_o                  =  1'b1;
-                    mul_or_div                      =  `MUL;
+                    mul_or_div_o                    =  `MUL;
                     muldiv_dividend_o               =  reg1_i;
                     muldiv_divisor_o                =  reg2_i;
                     muldiv_reg1_signed0_unsigned1   = `Signed;
@@ -187,7 +185,7 @@ module ex(
                 end
                 default: begin
                     muldiv_start_o                  =  1'b0;
-                    mul_or_div                      =  `MUL;
+                    mul_or_div_o                    =  `MUL;
                     muldiv_dividend_o               =  `ZeroWord;
                     muldiv_divisor_o                =  `ZeroWord;
                     muldiv_reg1_signed0_unsigned1   = `Unsigned;

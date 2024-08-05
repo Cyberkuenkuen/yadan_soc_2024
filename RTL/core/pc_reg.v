@@ -26,27 +26,26 @@ SOFTWARE.
 `include "yadan_defs.v"
 
 module pc_reg(
-    input       wire                clk,
-    input       wire                rst,
-    input       wire                PCchange_enable,
+    input  wire                clk,
+    input  wire                rst,
+    input  wire                PCchange_enable_i,
 
-    input       wire                branch_flag_i,
-    input       wire[`RegBus]       branch_addr_i,
-    input       wire[4:0]           stalled,
+    input  wire                branch_flag_i,
+    input  wire[`RegBus]       branch_addr_i,
+    input  wire[4:0]           stalled,
 
-    output      reg[`InstAddrBus]   pc_o,
-    output      wire                ce_o 
+    output reg[`InstAddrBus]   pc_o,
+    output wire                ce_o 
 );
 
-    assign  ce_o = PCchange_enable;
+    assign  ce_o = PCchange_enable_i;
 
     always @(posedge clk or negedge rst) begin
         if(rst == `RstEnable) begin
             pc_o    <=  `StartAdd;
-        end       
-        else begin
+        end else begin
             if(branch_flag_i == `BranchEnable) begin
-                    pc_o    <= branch_addr_i;
+                pc_o    <= branch_addr_i;
             // 优先根据跳转信号更新pc，如果在取指阶段发生流水线停顿，跳转信号不会因此丢失
             end else if(stalled[0] == `NoStop) begin
                 if(pc_o < `INSTADD_END) begin

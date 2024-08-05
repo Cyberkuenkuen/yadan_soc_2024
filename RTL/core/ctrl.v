@@ -27,32 +27,24 @@ SOFTWARE.
 
 module ctrl(
     input   wire                rst,
-    input   wire                stallreq_from_id,
-    input   wire                stallreq_from_ex,
-    input   wire                stallreq_from_if,
-    input   wire                stallreq_from_mem,
-    input   wire                stallreq_from_interrupt,
+    input   wire                stallreq_from_id_i,
+    input   wire                stallreq_from_ex_i,
+    input   wire                stallreq_from_if_i,
+    input   wire                stallreq_from_mem_i,
+    input   wire                stallreq_from_interrupt_i,
 
     input   wire                branch_flag_i,
-    input   wire[`InstAddrBus]  branch_addr_i,
-
-    output  reg                 branch_flag_o,
-    output  reg[`InstAddrBus]   branch_addr_o,
-
     output  reg[4:0]            stalled_o
 );
 
     always @(*) begin
-        branch_flag_o   = branch_flag_i;
-        branch_addr_o   = branch_addr_i;
-
-        if (stallreq_from_mem == `Stop ) begin //&& branch_flag_i == `BranchDisable) begin  
+        if (stallreq_from_mem_i == `Stop) begin //&& branch_flag_i == `BranchDisable) begin  
             stalled_o   =  5'b11111;
-        end else if (stallreq_from_ex == `Stop) begin
+        end else if (stallreq_from_ex_i == `Stop) begin
             stalled_o   =  5'b01111;
-        end else if (stallreq_from_id == `Stop) begin    
+        end else if (stallreq_from_id_i == `Stop) begin    
             stalled_o   =  5'b00111;
-        end else if (stallreq_from_if == `Stop) begin   // && branch_flag_i == `BranchDisable
+        end else if (stallreq_from_if_i == `Stop) begin   // && branch_flag_i == `BranchDisable
             stalled_o   =  5'b00011;
         end else begin
             stalled_o   =  5'b00000;

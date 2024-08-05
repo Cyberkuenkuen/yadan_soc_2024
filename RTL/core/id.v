@@ -26,7 +26,6 @@ SOFTWARE.
 `include "yadan_defs.v"
 
 module id(
-    input   wire                    rst,
     input   wire[`InstAddrBus]      pc_i,
     input   wire[`InstBus]          inst_i,
 

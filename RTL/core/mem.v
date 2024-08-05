@@ -26,8 +26,6 @@ SOFTWARE.
 `include "yadan_defs.v"
 
 module mem(
-    input   wire            rst,
-
     // 来自执行阶段的信息 from ex
     input   wire[`RegAddrBus]   wd_i,
     input   wire                wreg_i,
