@@ -55,21 +55,22 @@ module yadan_riscv(
     input  wire         M_HREADY        //1表示传输结束
 );
 
-    assign  M0_HPROT = 4'h0;
+    assign  M0_HPROT = 4'h0;            //保护控制
     assign  M1_HPROT = 4'h0;
-    assign  M0_HLOCK = 1'b0;
+    assign  M0_HLOCK = 1'b0;            //主机锁定总线
     assign  M1_HLOCK = 1'b0;
     
-    wire[`RegBus]   rom_data;
-    wire[`RegBus]   rom_addr_o;
-    wire            rom_ce;
+    // inst rom and data ram
+    wire[`RegBus]           rom_addr;   // from pc_reg(pc_o) to cpu_ahb_if
+    wire                    rom_ce;     // from pc_reg(ce_o) to cpu_ahb_if
+    wire[`RegBus]           rom_data;   // from cpu_ahb_if to if_id(inst_i)
 
-    wire[`RegBus]   ram_rdata;
-    wire[`RegBus]   ram_addr;
-    wire[`RegBus]   ram_wdata;
-    wire            ram_we;
-    wire[2:0]       ram_sel;
-    wire            ram_ce;
+    wire[`RegBus]           ram_addr;   // from mem to cpu_ahb_mem
+    wire                    ram_ce;
+    wire                    ram_we;
+    wire[2:0]               ram_sel;
+    wire[`RegBus]           ram_wdata;
+    wire[`RegBus]           ram_rdata;  // from cpu_ahb_mem to mem
 
     // from pc_reg to if_id
     wire[`InstAddrBus]      if_pc;
@@ -77,15 +78,24 @@ module yadan_riscv(
     // from if_id to id
     wire[`InstAddrBus]      if_id_pc;
     wire[`InstBus]          if_id_inst;
-
-
+    
+    // from id to regsfile
+    wire                    id_reg1_read;
+    wire                    id_reg2_read;
+    wire[`RegAddrBus]       id_reg1_addr;
+    wire[`RegAddrBus]       id_reg2_addr;
+    
+    // from regsfile to id
+    wire[`RegBus]           reg1_data;
+    wire[`RegBus]           reg2_data;
+    
     // from id to id_ex
     wire[`InstAddrBus]      id_pc;
     wire[`InstBus]          id_inst;
     wire[`AluOpBus]         id_aluop;
     wire[`AluSelBus]        id_alusel;
-    wire[`RegBus]           id_reg1;
-    wire[`RegBus]           id_reg2;
+    wire[`RegBus]           id_operand1;
+    wire[`RegBus]           id_operand2;
     wire                    id_wreg;
     wire[`RegAddrBus]       id_wd;
     wire                    id_wcsr_reg;
@@ -97,13 +107,29 @@ module yadan_riscv(
     wire[`InstBus]          id_ex_inst;
     wire[`AluOpBus]         id_ex_aluop;
     wire[`AluSelBus]        id_ex_alusel;
-    wire[`RegBus]           id_ex_reg1;
-    wire[`RegBus]           id_ex_reg2;
+    wire[`RegBus]           id_ex_operand1;
+    wire[`RegBus]           id_ex_operand2;
     wire                    id_ex_wreg;
     wire[`RegAddrBus]       id_ex_wd;
     wire                    id_ex_wcsr_reg;
     wire[`RegBus]           id_ex_csr_reg;
     wire[`DataAddrBus]      id_ex_wd_csr_reg;
+
+    // from ex to mul_div    
+    wire                    enable_in;
+    wire[`RegBus]           dividend;        
+    wire[`RegBus]           divisor;        
+    wire                    mul0_div1;
+    wire                    x_signed0_unsigned1;
+    wire                    y_signed0_unsigned1;
+
+    // from mul_div to ex
+    wire[`DoubleRegBus]     muldiv_result;
+    wire                    muldiv_done;
+
+    // branch info from ex
+    wire                    ex_branch_flag;
+    wire[`RegBus]           ex_branch_addr;
 
     // from ex to ex_mem
     wire                    ex_wreg;
@@ -112,24 +138,33 @@ module yadan_riscv(
 
     wire[`AluOpBus]         ex_aluop;
     wire[`DataAddrBus]      ex_memaddr;
-    wire[`RegBus]           ex_reg2;
+    wire[`RegBus]           ex_operand2;
 
-    // from mul_div to ex
-    wire[`DoubleRegBus]     muldiv_result;
-    wire                    muldiv_done;
+    // from ex_mem to mem
+    wire                    ex_mem_wreg;
+    wire[`RegAddrBus]       ex_mem_wd;
+    wire[`RegBus]           ex_mem_wdata;
 
-    // from ex to mul_div    
-    wire   enable_in;
-    wire   [31 : 0]  dividend;        
-    wire   [31 : 0]  divisor;        
-    wire   mul0_div1;
-    wire   x_signed0_unsigned1;
-    wire   y_signed0_unsigned1;
+    wire[`AluOpBus]         ex_mem_aluop;
+    wire[`DataAddrBus]      ex_mem_memaddr;
+    wire[`RegBus]           ex_mem_operand2;
 
-    // branch info from ex
-    wire                    ex_branch_flag;
-    wire[`RegBus]           ex_branch_addr;
+    // from mem to mem_wb
+    wire                    mem_wreg;
+    wire[`RegAddrBus]       mem_wd;
+    wire[`RegBus]           mem_wdata;
 
+    // from mem_wb (wb) to regsfile
+    wire                    wb_wreg;
+    wire[`RegAddrBus]       wb_wd;
+    wire[`RegBus]           wb_wdata;
+
+    // ctrl
+    wire[4:0]               stall;  
+    wire                    stallreq_from_id;
+    wire                    stallreq_from_mem;
+    wire                    stallreq_from_if;
+    wire                    stallreq_from_interrupt;
 
     // csr_reg
     wire[`RegBus]           csr_reg_data;
@@ -143,49 +178,13 @@ module yadan_riscv(
     
     // id to csr
     wire[`DataAddrBus]      id_csr_reg_addr;
+    
     // ex to csr 
     wire                    ex_wcsr_reg;
     wire[`DataAddrBus]      ex_wd_csr_reg;
     wire[`RegBus]           ex_wcsr_data;
 
-    // from ex_mem to mem
-    wire                    ex_mem_wreg;
-    wire[`RegAddrBus]       ex_mem_wd;
-    wire[`RegBus]           ex_mem_wdata;
-
-    wire[`AluOpBus]         ex_mem_aluop;
-    wire[`DataAddrBus]      ex_mem_memaddr;
-    wire[`RegBus]           ex_mem_reg2;
-
-    // from mem to mem_wb
-    wire                    mem_wreg;
-    wire[`RegAddrBus]       mem_wd;
-    wire[`RegBus]           mem_wdata;
-
-
-    // from mem_wb (wb) to regsfile
-    wire                    wb_wreg;
-    wire[`RegAddrBus]       wb_wd;
-    wire[`RegBus]           wb_wdata;
-
-    // from id to regsfile
-    wire                    id_reg1_read;
-    wire                    id_reg2_read;
-    wire[`RegAddrBus]       id_reg1_addr;
-    wire[`RegAddrBus]       id_reg2_addr;
-    
-    // from regsfile to id
-    wire[`RegBus]           reg1_data;
-    wire[`RegBus]           reg2_data;
-
-    // ctrl
-    wire[4:0]               stall;  
-    wire                    stallreq_from_id;
-    wire                    stallreq_from_mem;
-    wire                    stallreq_from_if;
-    wire                    stallreq_from_interrupt;
-
-    // interrupt模块输出信号
+    // interrupt
     wire interrupt_we_o;
     wire[`DataAddrBus] interrupt_waddr_o;
     wire[`DataAddrBus] interrupt_raddr_o;
@@ -203,11 +202,11 @@ module yadan_riscv(
         .PCchange_enable_i  (~ram_ce),
 
         // from ex
-        .branch_flag_i      (ex_branch_flag),
-        .branch_addr_i      (ex_branch_addr),
+        .ex_branch_flag_i   (ex_branch_flag),
+        .ex_branch_addr_i   (ex_branch_addr),
 
         // from ctrl
-        .stalled            (stall),
+        .stalled_i          (stall),
 
         // to if_id
         .pc_o               (if_pc),
@@ -216,8 +215,7 @@ module yadan_riscv(
         .ce_o               (rom_ce)
     );
 
-    assign  rom_addr_o  =  if_pc;  // 指令存储器的输入地址就是 pc 的值
-
+    assign  rom_addr  =  if_pc;  // 指令存储器的输入地址就是 pc 的值
 
     if_id u_if_id(
         .clk                (clk),
@@ -233,7 +231,7 @@ module yadan_riscv(
         .ex_branch_flag_i   (ex_branch_flag),
 
         // from ctrl
-        .stalled            (stall),
+        .stalled_i          (stall),
 
         // to id
         .pc_o               (if_id_pc),
@@ -275,17 +273,18 @@ module yadan_riscv(
         .reg2_addr_o        (id_reg2_addr),
 
         // to ctrl
-        .stallreq           (stallreq_from_id),
+        .stallreq_o         (stallreq_from_id),
 
         // to id_ex
         .pc_o               (id_pc),
         .inst_o             (id_inst),
         .aluop_o            (id_aluop),
         .alusel_o           (id_alusel),
-        .reg1_o             (id_reg1),
-        .reg2_o             (id_reg2),
+        .operand1_o         (id_operand1),
+        .operand2_o         (id_operand2),
         .reg_wd_o           (id_wd),
         .wreg_o             (id_wreg),
+
         .wcsr_reg_o         (id_wcsr_reg),
         .csr_reg_o          (id_csr_reg),
         .wd_csr_reg_o       (id_wd_csr_reg)
@@ -323,10 +322,11 @@ module yadan_riscv(
         .id_inst_i          (id_inst),
         .id_aluop           (id_aluop),
         .id_alusel          (id_alusel),
-        .id_reg1            (id_reg1),
-        .id_reg2            (id_reg2),
+        .id_operand1        (id_operand1),
+        .id_operand2        (id_operand2),
         .id_wd              (id_wd),
         .id_wreg            (id_wreg),
+
         .id_wcsr_reg        (id_wcsr_reg),
         .id_csr_reg         (id_csr_reg),
         .id_wd_csr_reg      (id_wd_csr_reg),
@@ -342,8 +342,8 @@ module yadan_riscv(
         .ex_inst_o          (id_ex_inst),
         .ex_aluop           (id_ex_aluop),
         .ex_alusel          (id_ex_alusel),
-        .ex_reg1            (id_ex_reg1),
-        .ex_reg2            (id_ex_reg2),
+        .ex_operand1        (id_ex_operand1),
+        .ex_operand2        (id_ex_operand2),
         .ex_wd              (id_ex_wd),
         .ex_wreg            (id_ex_wreg),
         .ex_wcsr_reg        (id_ex_wcsr_reg),
@@ -362,8 +362,8 @@ module yadan_riscv(
         .ex_inst            (id_ex_inst),
         .aluop_i            (id_ex_aluop),
         .alusel_i           (id_ex_alusel),
-        .reg1_i             (id_ex_reg1),
-        .reg2_i             (id_ex_reg2),
+        .operand1_i         (id_ex_operand1),
+        .operand2_i         (id_ex_operand2),
         .wd_i               (id_ex_wd),
         .wreg_i             (id_ex_wreg),
         .wcsr_reg_i         (id_ex_wcsr_reg),
@@ -389,8 +389,8 @@ module yadan_riscv(
 
         .ex_aluop_o         (ex_aluop),
         .ex_mem_addr_o      (ex_memaddr),
-        .ex_reg2_o          (ex_reg2),
-
+        .ex_operand2_o      (ex_operand2),
+    
         // to csr reg
         .wcsr_reg_o         (ex_wcsr_reg),
         .wd_csr_reg_o       (ex_wd_csr_reg),
@@ -416,7 +416,6 @@ module yadan_riscv(
     );
 
 
-
     ex_mem u_ex_mem(
         .clk                    (clk),
         .rst                    (rst),
@@ -428,7 +427,7 @@ module yadan_riscv(
 
         .ex_aluop_i             (ex_aluop),
         .ex_mem_addr_i          (ex_memaddr),
-        .ex_reg2_i              (ex_reg2),
+        .ex_operand2_i          (ex_operand2),
 
         // from ctrl
         .stalled                (stall),
@@ -440,7 +439,7 @@ module yadan_riscv(
 
         .mem_aluop              (ex_mem_aluop),
         .mem_mem_addr           (ex_mem_memaddr),
-        .mem_reg2               (ex_mem_reg2)
+        .mem_operand2           (ex_mem_operand2)
     );
 
 
@@ -452,7 +451,7 @@ module yadan_riscv(
 
         .mem_aluop_i            (ex_mem_aluop),
         .mem_mem_addr_i         (ex_mem_memaddr),
-        .mem_reg2_i             (ex_mem_reg2),
+        .mem_operand2_i         (ex_mem_operand2),
 
         //
         .int_assert_i(interrupt_int_assert_o),
@@ -462,10 +461,10 @@ module yadan_riscv(
         .wreg_o                 (mem_wreg),
         .wdata_o                (mem_wdata),
 
-        // from ram
+        // from cpu_ahb_mem
         .mem_data_i             (ram_rdata),
         
-        // to ram
+        // to cpu_ahb_mem
         .mem_addr_o             (ram_addr),
         .mem_we_o               (ram_we),
         .mem_data_o             (ram_wdata),
@@ -531,8 +530,8 @@ module yadan_riscv(
         .stallreq_from_if_i         (stallreq_from_if),
         .stallreq_from_interrupt_i  (stallreq_from_interrupt),
 
-        // from ex
-        .branch_flag_i              (ex_branch_flag),
+        .ex_branch_flag_i              (ex_branch_flag),   // from ex
+
         .stalled_o                  (stall)
     );
 
@@ -567,7 +566,7 @@ module yadan_riscv(
     cpu_ahb_if u_cpu_ahb_if (
         .clk                     ( clk               ),
         .rst                     ( rst               ),
-        .cpu_addr_i              ( rom_addr_o        ),
+        .cpu_addr_i              ( rom_addr        ),
         .cpu_ce_i                ( rom_ce          ),
         .cpu_we_i                ( `WriteDisable      ),
         .cpu_writedata_i         ( `ZeroWord         ),

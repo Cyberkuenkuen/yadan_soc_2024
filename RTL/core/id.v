@@ -26,6 +26,7 @@ SOFTWARE.
 `include "yadan_defs.v"
 
 module id(
+    // from if_id
     input   wire[`InstAddrBus]      pc_i,
     input   wire[`InstBus]          inst_i,
 
@@ -38,35 +39,35 @@ module id(
     input   wire[`RegBus]           ex_wdata_i,
     input   wire[`RegAddrBus]       ex_wd_i,
     input   wire                    ex_branch_flag_i,
-// load 相关
-    input   wire[`AluOpBus]         ex_aluop_i,
+    input   wire[`AluOpBus]         ex_aluop_i, // load 相关
 
-    // from wd mem
+    // from mem
     input   wire                    mem_wreg_i,
     input   wire[`RegBus]           mem_wdata_i,
     input   wire[`RegAddrBus]       mem_wd_i,
 
-    // from csr
+    // from csr_reg
     input   wire[`RegBus]           csr_reg_data_i,
 
-    // to csr reg
+    // to csr_reg
     output  reg[`DataAddrBus]       csr_reg_addr_o,
 
-    // output to regfile
+    // to regsfile
     output  reg                     reg1_read_o,
     output  reg                     reg2_read_o,
     output  reg[`RegAddrBus]        reg1_addr_o,
     output  reg[`RegAddrBus]        reg2_addr_o,
 
-    // output execution
-    output  wire                    stallreq,
+    // to ctrl
+    output  wire                    stallreq_o,
 
+    // to id_ex
     output  wire[`InstAddrBus]      pc_o,
     output  reg[`InstBus]           inst_o,
     output  reg[`AluOpBus]          aluop_o,
     output  reg[`AluSelBus]         alusel_o,
-    output  reg[`RegBus]            reg1_o,
-    output  reg[`RegBus]            reg2_o,
+    output  reg[`RegBus]            operand1_o,
+    output  reg[`RegBus]            operand2_o,
     output  reg[`RegAddrBus]        reg_wd_o,
     output  reg                     wreg_o,
     
@@ -95,12 +96,12 @@ module id(
     reg     reg1_stallreq;
     reg     reg2_stallreq;
     wire    pre_inst_is_load;
-    assign  stallreq = reg1_stallreq | reg2_stallreq;
-    assign pre_inst_is_load = ( (ex_aluop_i == `EXE_LB) ||
-                                (ex_aluop_i == `EXE_LH) ||
-                                (ex_aluop_i == `EXE_LW) ||
-                                (ex_aluop_i == `EXE_LBU)||
-                                (ex_aluop_i == `EXE_LHU)) ? 1'b1 : 1'b0;
+    assign  stallreq_o = reg1_stallreq | reg2_stallreq;
+    assign pre_inst_is_load = (ex_aluop_i == `EXE_LB) ||
+                              (ex_aluop_i == `EXE_LH) ||
+                              (ex_aluop_i == `EXE_LW) ||
+                              (ex_aluop_i == `EXE_LBU)||
+                              (ex_aluop_i == `EXE_LHU);
     
     assign pc_o = pc_i;//202167 修改，将pc_o 原来有跳转清零改
 
@@ -109,30 +110,30 @@ module id(
     always @ (*) begin
         // 本条指令不会读取源寄存器，输出对应的立即数
         if (reg1_read_o == 1'b0) begin
-            reg1_o  = imm_1;
+            operand1_o  = imm_1;
             reg1_stallreq = `NoStop;
         // 本条指令读取寄存器zero，输出0，不参与后续分支判断
         end else if (reg1_addr_o == 5'b00000) begin
-            reg1_o  = `ZeroWord;
+            operand1_o  = `ZeroWord;
             reg1_stallreq = `NoStop;
         // 如果：上条指令是load（在访存阶段才能取到数据），且，上条指令的目的寄存器 是本条指令的源寄存器1
         // 那么存在数据冒险RAW，且必须等待一周期，因此请求流水线停顿
         end else if (pre_inst_is_load == 1'b1 && ex_wd_i == reg1_addr_o) begin
-            reg1_o  = `ZeroWord;
+            operand1_o  = `ZeroWord;
             reg1_stallreq = `Stop;
         // 如果：上条指令不是load，但目的寄存器 是本条指令的源寄存器1
-        // 那么存在RAW数据冒险，直接把执行阶段的结果 ex_wdata_i 作为 reg1_o 的值
+        // 那么存在RAW数据冒险，直接把执行阶段的结果 ex_wdata_i 作为 operand1_o 的值
         end else if (ex_wreg_i == 1'b1 && ex_wd_i == reg1_addr_o) begin
-            reg1_o  = ex_wdata_i;
+            operand1_o  = ex_wdata_i;
             reg1_stallreq = `NoStop;
         // 如果：上上条指令的目的寄存器 是本条指令的源寄存器1
-        // 那么存在数据冒险RAW，直接把访存阶段的结果 mem_wdata_i 作为 reg1_o 的值
+        // 那么存在数据冒险RAW，直接把访存阶段的结果 mem_wdata_i 作为 operand1_o 的值
         end else if (mem_wreg_i == 1'b1 && mem_wd_i == reg1_addr_o) begin
-            reg1_o  = mem_wdata_i;
+            operand1_o  = mem_wdata_i;
             reg1_stallreq = `NoStop;
         //else 使用 register file port 1 的输出
         end else begin
-            reg1_o  = reg1_data_i; 
+            operand1_o  = reg1_data_i; 
             reg1_stallreq = `NoStop;        // regfile port 1 output data
         end
     end
@@ -140,22 +141,22 @@ module id(
     // 确定运算的源操作数 2
     always @ (*) begin
         if (reg2_read_o == 1'b0) begin
-            reg2_o  = imm_2;
+            operand2_o  = imm_2;
             reg2_stallreq = `NoStop;
         end else if (reg2_addr_o == 5'b00000) begin
-            reg2_o  = `ZeroWord;
+            operand2_o  = `ZeroWord;
             reg2_stallreq = `NoStop;
         end else if (pre_inst_is_load == 1'b1 && ex_wd_i == reg2_addr_o) begin
             reg2_stallreq = `Stop; 
-            reg2_o  = `ZeroWord;
+            operand2_o  = `ZeroWord;
         end else if (ex_wreg_i == 1'b1 && ex_wd_i == reg2_addr_o) begin
-            reg2_o  = ex_wdata_i;
+            operand2_o  = ex_wdata_i;
             reg2_stallreq = `NoStop;
         end else if (mem_wreg_i == 1'b1 && mem_wd_i == reg2_addr_o) begin
-            reg2_o  = mem_wdata_i;
+            operand2_o  = mem_wdata_i;
             reg2_stallreq = `NoStop;
         end else begin
-            reg2_o  = reg2_data_i;
+            operand2_o  = reg2_data_i;
             reg2_stallreq = `NoStop;
         end
     end

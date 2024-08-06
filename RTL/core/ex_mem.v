@@ -36,7 +36,7 @@ module ex_mem(
 
     input   wire[`AluOpBus]         ex_aluop_i,
     input   wire[`DataAddrBus]      ex_mem_addr_i,
-    input   wire[`RegBus]           ex_reg2_i,
+    input   wire[`RegBus]           ex_operand2_i,
 
     input   wire[4:0]               stalled,
 
@@ -47,7 +47,7 @@ module ex_mem(
 
     output  reg[`AluOpBus]          mem_aluop,
     output  reg[`DataAddrBus]       mem_mem_addr,
-    output  reg[`RegBus]            mem_reg2
+    output  reg[`RegBus]            mem_operand2
 );
 
     always  @ (posedge clk or negedge rst) begin
@@ -57,7 +57,7 @@ module ex_mem(
             mem_wdata   <= `ZeroWord;
             mem_aluop   <= `EXE_NONE;
             mem_mem_addr<= `ZeroWord;
-            mem_reg2    <= `ZeroWord;
+            mem_operand2    <= `ZeroWord;
         end else begin
             if (stalled[3] == `NoStop) begin
                 mem_wd      <= ex_wd;
@@ -65,14 +65,14 @@ module ex_mem(
                 mem_wdata   <= ex_wdata;
                 mem_aluop   <= ex_aluop_i;
                 mem_mem_addr<= ex_mem_addr_i;
-                mem_reg2    <= ex_reg2_i;
+                mem_operand2    <= ex_operand2_i;
             end else if (stalled[4] == `NoStop) begin
                 mem_wd      <= `NOPRegAddr;
                 mem_wreg    <= `WriteDisable;
                 mem_wdata   <= `ZeroWord;
                 mem_aluop   <= `EXE_NONE;
                 mem_mem_addr<= `ZeroWord;
-                mem_reg2    <= `ZeroWord;
+                mem_operand2    <= `ZeroWord;
             end //else 保持不变
         end
     end

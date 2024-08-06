@@ -31,8 +31,8 @@ module ex(
     input   wire[`InstBus]      ex_inst,
     input   wire[`AluOpBus]     aluop_i,
     input   wire[`AluSelBus]    alusel_i,
-    input   wire[`RegBus]       reg1_i,
-    input   wire[`RegBus]       reg2_i,
+    input   wire[`RegBus]       operand1_i,
+    input   wire[`RegBus]       operand2_i,
     input   wire[`RegAddrBus]   wd_i,
     input   wire                wreg_i,
     input   wire                wcsr_reg_i,
@@ -64,7 +64,7 @@ module ex(
 
     output  reg[`AluOpBus]      ex_aluop_o,
     output  reg[`DataAddrBus]   ex_mem_addr_o,
-    output  reg[`RegBus]        ex_reg2_o,
+    output  reg[`RegBus]        ex_operand2_o,
 
     // output to csr_reg
     output  wire                wcsr_reg_o,         // write csr enable
@@ -119,10 +119,10 @@ module ex(
                     arithresult     =  muldiv_result_i[31:0];
                 end
                 `EXE_ADD: begin
-                    arithresult     = (reg1_i + reg2_i);
+                    arithresult     = (operand1_i + operand2_i);
                 end 
                 `EXE_SUB: begin
-                    arithresult     = (reg1_i - reg2_i);
+                    arithresult     = (operand1_i - operand2_i);
                 end      
                 default: 
                     arithresult     = `ZeroWord;
@@ -140,48 +140,48 @@ module ex(
                 `EXE_DIV,`EXE_REM  : begin
                     muldiv_start_o                  =  1'b1;
                     mul_or_div_o                    =  `DIV;
-                    muldiv_dividend_o               =  reg1_i;
-                    muldiv_divisor_o                =  reg2_i;
+                    muldiv_dividend_o               =  operand1_i;
+                    muldiv_divisor_o                =  operand2_i;
                     muldiv_reg1_signed0_unsigned1   = `Signed;
                     muldiv_reg2_signed0_unsigned1   = `Signed;
                 end
                 `EXE_DIVU,`EXE_REMU : begin
                     muldiv_start_o                  =  1'b1;
                     mul_or_div_o                    =  `DIV;
-                    muldiv_dividend_o               =  reg1_i;
-                    muldiv_divisor_o                =  reg2_i;
+                    muldiv_dividend_o               =  operand1_i;
+                    muldiv_divisor_o                =  operand2_i;
                     muldiv_reg1_signed0_unsigned1   = `Unsigned;
                     muldiv_reg2_signed0_unsigned1   = `Unsigned;
                 end
                 `EXE_MUL,`EXE_MULHU  : begin
                     muldiv_start_o                  =  1'b1;
                     mul_or_div_o                    =  `MUL;
-                    muldiv_dividend_o               =  reg1_i;
-                    muldiv_divisor_o                =  reg2_i;
+                    muldiv_dividend_o               =  operand1_i;
+                    muldiv_divisor_o                =  operand2_i;
                     muldiv_reg1_signed0_unsigned1   = `Unsigned;
                     muldiv_reg2_signed0_unsigned1   = `Unsigned;
                 end
                 `EXE_MULH:  begin
                     muldiv_start_o                  =  1'b1;
                     mul_or_div_o                    =  `MUL;
-                    muldiv_dividend_o               =  reg1_i;
-                    muldiv_divisor_o                =  reg2_i;
+                    muldiv_dividend_o               =  operand1_i;
+                    muldiv_divisor_o                =  operand2_i;
                     muldiv_reg1_signed0_unsigned1   = `Signed;
                     muldiv_reg2_signed0_unsigned1   = `Signed;
                 end
                 `EXE_MULHSU: begin
                     muldiv_start_o                  =  1'b1;
                     mul_or_div_o                    =  `MUL;
-                    muldiv_dividend_o               =  reg1_i;
-                    muldiv_divisor_o                =  reg2_i;
+                    muldiv_dividend_o               =  operand1_i;
+                    muldiv_divisor_o                =  operand2_i;
                     muldiv_reg1_signed0_unsigned1   = `Signed;
                     muldiv_reg2_signed0_unsigned1   = `Unsigned;
                 end
                 `EXE_ADD: begin
-                    arithresult                     = reg1_i + reg2_i;
+                    arithresult                     = operand1_i + operand2_i;
                 end 
                 `EXE_SUB: begin
-                    arithresult                     = reg1_i - reg2_i;
+                    arithresult                     = operand1_i - operand2_i;
                 end
                 default: begin
                     muldiv_start_o                  =  1'b0;
@@ -199,10 +199,10 @@ module ex(
     // aluop 传递到 访存阶段
     always @(*) begin
             ex_aluop_o  = aluop_i;
-            ex_reg2_o   = reg2_i; 
+            ex_operand2_o   = operand2_i; 
             case (alusel_i)
-                `EXE_RES_LOAD:  ex_mem_addr_o   = (reg1_i + {{20{ex_inst[31]}}, ex_inst[31:20]});
-                `EXE_RES_STORE: ex_mem_addr_o   = (reg1_i + {{20{ex_inst[31]}}, ex_inst[31:25], ex_inst[11:7]});
+                `EXE_RES_LOAD:  ex_mem_addr_o   = (operand1_i + {{20{ex_inst[31]}}, ex_inst[31:20]});
+                `EXE_RES_STORE: ex_mem_addr_o   = (operand1_i + {{20{ex_inst[31]}}, ex_inst[31:25], ex_inst[11:7]});
                 default:        ex_mem_addr_o   = `ZeroWord;
             endcase
     end
@@ -212,9 +212,9 @@ module ex(
     // logic 
     always @ (*) begin
             case (aluop_i)
-                `EXE_AND:   logicout = (reg1_i & reg2_i);
-                `EXE_OR:    logicout = (reg1_i | reg2_i);
-                `EXE_XOR:   logicout = (reg1_i ^ reg2_i);
+                `EXE_AND:   logicout = (operand1_i & operand2_i);
+                `EXE_OR:    logicout = (operand1_i | operand2_i);
+                `EXE_XOR:   logicout = (operand1_i ^ operand2_i);
                 default:    logicout = `ZeroWord;
             endcase
     end // always
@@ -223,13 +223,13 @@ module ex(
     always @(*) begin
         case (aluop_i)
             `EXE_SLT:  begin
-                if (reg1_i[31] != reg2_i[31]) begin             // 有符号数，首先比较符号位
-                    compare = reg1_i[31] ? 32'h1 : 32'h0;  
+                if (operand1_i[31] != operand2_i[31]) begin             // 有符号数，首先比较符号位
+                    compare = operand1_i[31] ? 32'h1 : 32'h0;  
                 end else begin
-                    compare = reg1_i < reg2_i ? 32'h1 : 32'h0;
+                    compare = operand1_i < operand2_i ? 32'h1 : 32'h0;
                 end
             end
-            `EXE_SLTU: compare = reg1_i < reg2_i ? 32'h1 : 32'h0;
+            `EXE_SLTU: compare = operand1_i < operand2_i ? 32'h1 : 32'h0;
             default:   compare = `ZeroWord;
         endcase
     end
@@ -237,10 +237,10 @@ module ex(
     // shift
     always @ (*) begin
         case (aluop_i)
-            `EXE_SLL: shiftres    = (reg1_i << reg2_i[4:0]);
-            `EXE_SRL: shiftres    = (reg1_i >> reg2_i[4:0]);
-            `EXE_SRA: shiftres    = (({32{reg1_i[31]}} << (6'd32 - {1'b0, reg2_i[4:0]})) | (reg1_i >> reg2_i[4:0]));
-            `EXE_LUI: shiftres    = reg2_i;
+            `EXE_SLL: shiftres    = (operand1_i << operand2_i[4:0]);
+            `EXE_SRL: shiftres    = (operand1_i >> operand2_i[4:0]);
+            `EXE_SRA: shiftres    = (({32{operand1_i[31]}} << (6'd32 - {1'b0, operand2_i[4:0]})) | (operand1_i >> operand2_i[4:0]));
+            `EXE_LUI: shiftres    = operand2_i;
             default:  shiftres    = `ZeroWord;
         endcase
     end
@@ -252,44 +252,44 @@ module ex(
         branchres       = `ZeroWord;
         case (aluop_i)
             `EXE_BEQ: begin
-                if (reg1_i == reg2_i) begin
+                if (operand1_i == operand2_i) begin
                     branch_flag   = `BranchEnable;
                     branch_addr   = ex_pc + {{20{ex_inst[31]}}, ex_inst[7], ex_inst[30:25], ex_inst[11:8], 1'b0};
                 end
             end 
             `EXE_BNE: begin
-                if (reg1_i != reg2_i) begin
+                if (operand1_i != operand2_i) begin
                     branch_flag   = `BranchEnable;
                     branch_addr   = ex_pc + {{20{ex_inst[31]}}, ex_inst[7], ex_inst[30:25], ex_inst[11:8], 1'b0};
                 end
             end
             `EXE_BLT: begin
-                if (reg1_i[31] != reg2_i[31]) begin
-                    branch_flag   = (reg1_i[31] ? `BranchEnable : `BranchDisable);
+                if (operand1_i[31] != operand2_i[31]) begin
+                    branch_flag   = (operand1_i[31] ? `BranchEnable : `BranchDisable);
                     branch_addr   = ex_pc + {{20{ex_inst[31]}}, ex_inst[7], ex_inst[30:25], ex_inst[11:8], 1'b0};
-                end else if (reg1_i < reg2_i) begin
+                end else if (operand1_i < operand2_i) begin
                     branch_flag   = `BranchEnable;
                     branch_addr   = ex_pc + {{20{ex_inst[31]}}, ex_inst[7], ex_inst[30:25], ex_inst[11:8], 1'b0}; 
                 end
             end
             `EXE_BGE: begin
-                if (reg1_i[31] != reg2_i[31]) begin
-                    branch_flag   = (reg1_i[31] ? `BranchDisable : `BranchEnable);
+                if (operand1_i[31] != operand2_i[31]) begin
+                    branch_flag   = (operand1_i[31] ? `BranchDisable : `BranchEnable);
                     branch_addr   = ex_pc + {{20{ex_inst[31]}}, ex_inst[7], ex_inst[30:25], ex_inst[11:8], 1'b0};
-                end else if (reg1_i < reg2_i) begin
+                end else if (operand1_i < operand2_i) begin
                 end else begin
                     branch_flag   = `BranchEnable;
                     branch_addr   = ex_pc + {{20{ex_inst[31]}}, ex_inst[7], ex_inst[30:25], ex_inst[11:8], 1'b0};
                 end
             end
             `EXE_BLTU: begin
-                if (reg1_i < reg2_i) begin
+                if (operand1_i < operand2_i) begin
                     branch_flag   = `BranchEnable;
                     branch_addr   = ex_pc + {{20{ex_inst[31]}}, ex_inst[7], ex_inst[30:25], ex_inst[11:8], 1'b0};
                 end
             end
             `EXE_BGEU: begin
-                if (reg1_i < reg2_i) begin
+                if (operand1_i < operand2_i) begin
                 end else begin
                     branch_flag   = `BranchEnable;
                     branch_addr   = ex_pc + {{20{ex_inst[31]}}, ex_inst[7], ex_inst[30:25], ex_inst[11:8], 1'b0};
@@ -302,7 +302,7 @@ module ex(
             end
             `EXE_JALR: begin
                 branch_flag     = `BranchEnable;
-                branch_addr     = (reg1_i + {{20{ex_inst[31]}}, ex_inst[31:20]}) & (32'hfffffffe);
+                branch_addr     = (operand1_i + {{20{ex_inst[31]}}, ex_inst[31:20]}) & (32'hfffffffe);
                 branchres       = ex_pc + 4'h4;
             end
             default: begin
@@ -319,9 +319,9 @@ module ex(
 
     always @(*) begin
         case (aluop_i)
-            `EXE_CSRRW: wcsr_data_o = reg1_i;
-            `EXE_CSRRS: wcsr_data_o = csr_reg_i | reg1_i;
-            `EXE_CSRRC: wcsr_data_o = csr_reg_i & (~reg1_i);
+            `EXE_CSRRW: wcsr_data_o = operand1_i;
+            `EXE_CSRRS: wcsr_data_o = csr_reg_i | operand1_i;
+            `EXE_CSRRC: wcsr_data_o = csr_reg_i & (~operand1_i);
             default:    wcsr_data_o = `ZeroWord;
         endcase
     end

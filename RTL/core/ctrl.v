@@ -33,18 +33,18 @@ module ctrl(
     input   wire                stallreq_from_mem_i,
     input   wire                stallreq_from_interrupt_i,
 
-    input   wire                branch_flag_i,
+    input   wire                ex_branch_flag_i,
     output  reg[4:0]            stalled_o
 );
 
     always @(*) begin
-        if (stallreq_from_mem_i == `Stop) begin //&& branch_flag_i == `BranchDisable) begin  
+        if (stallreq_from_mem_i == `Stop) begin //&& ex_branch_flag_i == `BranchDisable) begin  
             stalled_o   =  5'b11111;
         end else if (stallreq_from_ex_i == `Stop) begin
             stalled_o   =  5'b01111;
         end else if (stallreq_from_id_i == `Stop) begin    
             stalled_o   =  5'b00111;
-        end else if (stallreq_from_if_i == `Stop) begin   // && branch_flag_i == `BranchDisable
+        end else if (stallreq_from_if_i == `Stop) begin   // && ex_branch_flag_i == `BranchDisable
             stalled_o   =  5'b00011;
         end else begin
             stalled_o   =  5'b00000;
