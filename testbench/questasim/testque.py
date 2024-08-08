@@ -84,7 +84,7 @@ def main():
     write_last_index(index_file, 0)#初始化
     last_index = read_last_index(index_file)#读行数
     current_s_file = read_line_from_file(file_path, last_index)#当前行数对应的 指令名称.S
-    vsim_cmd = 'vsim -c -64 -do ./questasim/simulation.tcl'
+    vsim_cmd = 'vsim -c -64 -do ./questasim/compile.tcl'
     subprocess.run(vsim_cmd, stdout=subprocess.PIPE, input='exit\n', text=True)
 
     for i in range(len(lines)):
@@ -112,7 +112,7 @@ def main():
             continue
 
         # # Compile RTL files
-        # compile_cmd = 'vsim -c -64 -do ./questasim/simulation.tcl'
+        # compile_cmd = 'vsim -c -64 -do ./questasim/compile.tcl'
         # compile_process = subprocess.run(compile_cmd, shell=True)
         # if compile_process.returncode != 0:
         #     print('!!!Fail, vsim command failed!!!')

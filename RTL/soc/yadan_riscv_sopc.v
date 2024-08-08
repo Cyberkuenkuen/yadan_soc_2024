@@ -85,16 +85,17 @@ module yadan_riscv_sopc(
 
         
 yadan_riscv  u_yadan_riscv (
+    // in
     .clk                     ( clk          ),
     .rst_n                   ( rst          ),
-    // .set_mode                ( 1'b0     ),
-    .int_i                   (  6'b0     ),//intn 
-    .M0_HGRANT                ( M0_HGRANT     ),
+    .int_flag_i              (  8'b0        ),//intn 
+    .M0_HGRANT               ( M0_HGRANT    ),
     .M1_HGRANT               ( M1_HGRANT    ),
     .M_HRDATA                ( M_HRDATA     ),
     .M_HRESP                 ( M_HRESP      ),
     .M_HREADY                ( M_HREADY     ),
-
+    
+    // out
     .M0_HBUSREQ              ( M0_HBUSREQ   ),
     .M0_HADDR                ( M0_HADDR     ),
     .M0_HTRANS               ( M0_HTRANS    ),
