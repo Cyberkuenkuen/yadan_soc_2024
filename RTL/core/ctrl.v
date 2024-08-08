@@ -26,7 +26,6 @@ SOFTWARE.
 `include "yadan_defs.v"
 
 module ctrl(
-    input   wire                rst,
     input   wire                stallreq_from_id_i,
     input   wire                stallreq_from_ex_i,
     input   wire                stallreq_from_if_i,

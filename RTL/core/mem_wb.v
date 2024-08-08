@@ -27,30 +27,31 @@ SOFTWARE.
 
 module mem_wb(
     input   wire            clk,
-    input   wire            rst,
+    input   wire            rst_n,
 
-    // 访存阶段的结果
-    input   wire[`RegAddrBus]   mem_wd,
-    input   wire                mem_wreg,
-    input   wire[`RegBus]       mem_wdata,
+    // from mem
+    input   wire                mem_wreg_i,
+    input   wire[`RegAddrBus]   mem_wreg_addr_i,
+    input   wire[`RegBus]       mem_wreg_data_i,
 
-    input   wire[4:0]           stalled,
+    // from ctrl
+    input   wire[4:0]           stalled_i,
 
-    // 送到回写阶段的信息
-    output  reg[`RegAddrBus]    wb_wd,
-    output  reg                 wb_wreg,
-    output  reg[`RegBus]        wb_wdata
+    // to regsfile (wb)
+    output  reg                 wb_wreg_o,
+    output  reg[`RegAddrBus]    wb_wreg_addr_o,
+    output  reg[`RegBus]        wb_wreg_data_o
 );
 
-    always @(posedge clk or negedge rst) begin
-        if (rst == `RstEnable) begin
-            wb_wd       <= `NOPRegAddr;
-            wb_wreg     <= `WriteDisable;
-            wb_wdata    <= `ZeroWord;
-        end else if (stalled[4] == `NoStop) begin
-            wb_wd       <= mem_wd;
-            wb_wreg     <= mem_wreg;
-            wb_wdata    <= mem_wdata;
+    always @(posedge clk or negedge rst_n) begin
+        if (rst_n == `RstEnable) begin
+            wb_wreg_addr_o  <= `NOPRegAddr;
+            wb_wreg_o       <= `WriteDisable;
+            wb_wreg_data_o  <= `ZeroWord;
+        end else if (stalled_i[4] == `NoStop) begin
+            wb_wreg_addr_o  <= mem_wreg_addr_i;
+            wb_wreg_o       <= mem_wreg_i;
+            wb_wreg_data_o  <= mem_wreg_data_i;
         end
     end
 

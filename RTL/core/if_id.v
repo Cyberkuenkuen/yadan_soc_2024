@@ -27,7 +27,7 @@ SOFTWARE.
 
 module if_id(
     input   wire        clk,  
-    input   wire        rst,
+    input   wire        rst_n,
 
     // from if
     input   wire[`InstAddrBus]      pc_i,   // from pc_reg
@@ -44,8 +44,8 @@ module if_id(
     output  reg[`InstBus]           inst_o
 );
 
-    always @ (posedge clk or negedge rst)  begin
-        if (rst == `RstEnable) begin
+    always @(posedge clk or negedge rst_n) begin
+        if (rst_n == `RstEnable) begin
             pc_o    <= `ZeroWord;
             inst_o  <= `ZeroWord;
         end else begin

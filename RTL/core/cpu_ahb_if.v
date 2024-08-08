@@ -27,7 +27,7 @@ SOFTWARE.
 
 module cpu_ahb_if (
     input   wire                clk,
-    input   wire                rst,
+    input   wire                rst_n,
 
     // cpu侧接口
     input   wire [31:0]         cpu_addr_i,
@@ -62,8 +62,8 @@ module cpu_ahb_if (
     reg [2:0] state;
     reg [2:0] nxt_state;
     
-    always @(posedge clk or negedge rst) begin 
-        if (!rst)
+    always @(posedge clk or negedge rst_n) begin 
+        if (rst_n == `RstEnable)
             state <= IDLE ;
         else 
             state <= nxt_state;

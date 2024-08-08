@@ -26,68 +26,63 @@ SOFTWARE.
 `include "yadan_defs.v"
 
 module ex(
-    // from id/ex 译码阶段送到执行阶段的信息
-    input   wire[`InstAddrBus]  ex_pc,
-    input   wire[`InstBus]      ex_inst,
+    input   wire                int_assert_i,  // 中断发生标志
+    input   wire[`InstAddrBus]  int_addr_i,    // 中断跳转地址
+
+    // from id/ex
+    input   wire[`InstAddrBus]  pc_i,
+    input   wire[`InstBus]      inst_i,
     input   wire[`AluOpBus]     aluop_i,
     input   wire[`AluSelBus]    alusel_i,
     input   wire[`RegBus]       operand1_i,
     input   wire[`RegBus]       operand2_i,
-    input   wire[`RegAddrBus]   wd_i,
     input   wire                wreg_i,
-    input   wire                wcsr_reg_i,
-    input   wire[`RegBus]       csr_reg_i,
-    input   wire[`DataAddrBus]  wd_csr_reg_i,
-
-    //from mul/div
+    input   wire[`RegAddrBus]   wreg_addr_i,
     
+    input   wire[`RegBus]       csr_data_i,
+    input   wire                wcsr_i,
+    input   wire[`DataAddrBus]  wcsr_addr_i,
+
+    // from mul_div
     input   wire[`DoubleRegBus] muldiv_result_i,
     input   wire                muldiv_done_i,
-    // input   wire[`RegAddrBus]   div_reg_waddr_i,
 
-    input wire                  int_assert_i,                // 中断发生标志
-    input wire[`InstAddrBus]    int_addr_i,    // 中断跳转地址
-
-    //to mul/div
+    // to mul_div
     output  reg                 muldiv_start_o,
     output  reg[`RegBus]        muldiv_dividend_o,
     output  reg[`RegBus]        muldiv_divisor_o,
     output  reg                 mul_or_div_o,
-    output  reg                 muldiv_reg1_signed0_unsigned1,
-    output  reg                 muldiv_reg2_signed0_unsigned1,
+    output  reg                 muldiv_reg1_sign_o,
+    output  reg                 muldiv_reg2_sign_o,
 
+    // to ex_mem
+    output  wire                wreg_o,         //写寄存器使能
+    output  wire[`RegAddrBus]   wreg_addr_o,    //写寄存器地址
+    output  wire[`RegBus]       wreg_data_o,    //写寄存器数据
 
-    // 执行结果 to ex_mem
-    output  wire[`RegAddrBus]   wd_o,       //写寄存器地址
-    output  wire                wreg_o,     //写寄存器使能
-    output  wire[`RegBus]       wdata_o,    //写寄存器数据
+    output  reg[`AluOpBus]      aluop_o,
+    output  reg[`DataAddrBus]   memaddr_o,
+    output  reg[`RegBus]        operand2_o,
 
-    output  reg[`AluOpBus]      ex_aluop_o,
-    output  reg[`DataAddrBus]   ex_mem_addr_o,
-    output  reg[`RegBus]        ex_operand2_o,
-
-    // output to csr_reg
-    output  wire                wcsr_reg_o,         // write csr enable
-    output  wire[`DataAddrBus]  wd_csr_reg_o,
+    // to csr_reg
+    output  wire                wcsr_o,         // write csr enable
+    output  wire[`DataAddrBus]  wcsr_addr_o,
     output  reg[`RegBus]        wcsr_data_o,   
 
-    // output  pc_reg / ctrl
-    
+    // branch info
     output  wire                branch_flag_o,
     output  wire[`RegBus]       branch_addr_o
 );
 
-    reg[`RegAddrBus]        wd;   
-    reg                     wreg; 
-    reg[`RegBus]            wdata;
+    reg[`RegAddrBus]        wreg_addr;
+    reg                     wreg;
+    reg[`RegBus]            wreg_data;
     reg                     branch_flag;
     reg[`InstAddrBus]       branch_addr;
     
-    assign  wd_o            =   wd;
     assign  wreg_o          =   (int_assert_i == `INT_ASSERT)? `WriteDisable: wreg;
-    assign  wdata_o         =   wdata;
-
-
+    assign  wreg_addr_o     =   wreg_addr;
+    assign  wreg_data_o     =   wreg_data;
 
     assign  branch_flag_o   =   (branch_flag == `BranchEnable) ||  ((int_assert_i == `INT_ASSERT)? `BranchEnable: `BranchDisable);
     assign  branch_addr_o   =   (int_assert_i == `INT_ASSERT)? int_addr_i: branch_addr;
@@ -105,15 +100,15 @@ module ex(
     //arith
     always @(*) begin
         if (muldiv_done_i) begin   // mul/div 运算结束
-            muldiv_start_o                  =  1'b0;
-            mul_or_div_o                    =  `MUL;
-            muldiv_dividend_o               =  `ZeroWord;
-            muldiv_divisor_o                =  `ZeroWord;
-            muldiv_reg1_signed0_unsigned1   = `Unsigned;
-            muldiv_reg2_signed0_unsigned1   = `Unsigned; 
+            muldiv_start_o          =  1'b0;
+            mul_or_div_o            =  `MUL;
+            muldiv_dividend_o       =  `ZeroWord;
+            muldiv_divisor_o        =  `ZeroWord;
+            muldiv_reg1_sign_o      = `Unsigned;
+            muldiv_reg2_sign_o      = `Unsigned; 
             case (aluop_i)
                 `EXE_DIV,`EXE_DIVU,`EXE_MULHU,`EXE_MULH,`EXE_MULHSU  : begin
-                arithresult      =  muldiv_result_i[63:32]; 
+                arithresult         =  muldiv_result_i[63:32]; 
                 end 
                 `EXE_REM,`EXE_REMU, `EXE_MUL : begin
                     arithresult     =  muldiv_result_i[31:0];
@@ -129,68 +124,68 @@ module ex(
             endcase
             
         end else begin     //mul/div 没有运行或没有运行结束
-            arithresult                     = `ZeroWord;
-            muldiv_start_o                  =  1'b0;
-            mul_or_div_o                    =  `MUL;
-            muldiv_dividend_o               =  `ZeroWord;
-            muldiv_divisor_o                =  `ZeroWord;
-            muldiv_reg1_signed0_unsigned1   = `Unsigned;
-            muldiv_reg2_signed0_unsigned1   = `Unsigned; 
+            arithresult             = `ZeroWord;
+            muldiv_start_o          =  1'b0;
+            mul_or_div_o            =  `MUL;
+            muldiv_dividend_o       =  `ZeroWord;
+            muldiv_divisor_o        =  `ZeroWord;
+            muldiv_reg1_sign_o      = `Unsigned;
+            muldiv_reg2_sign_o      = `Unsigned; 
             case (aluop_i)
                 `EXE_DIV,`EXE_REM  : begin
-                    muldiv_start_o                  =  1'b1;
-                    mul_or_div_o                    =  `DIV;
-                    muldiv_dividend_o               =  operand1_i;
-                    muldiv_divisor_o                =  operand2_i;
-                    muldiv_reg1_signed0_unsigned1   = `Signed;
-                    muldiv_reg2_signed0_unsigned1   = `Signed;
+                    muldiv_start_o      =  1'b1;
+                    mul_or_div_o        =  `DIV;
+                    muldiv_dividend_o   =  operand1_i;
+                    muldiv_divisor_o    =  operand2_i;
+                    muldiv_reg1_sign_o  = `Signed;
+                    muldiv_reg2_sign_o  = `Signed;
                 end
                 `EXE_DIVU,`EXE_REMU : begin
-                    muldiv_start_o                  =  1'b1;
-                    mul_or_div_o                    =  `DIV;
-                    muldiv_dividend_o               =  operand1_i;
-                    muldiv_divisor_o                =  operand2_i;
-                    muldiv_reg1_signed0_unsigned1   = `Unsigned;
-                    muldiv_reg2_signed0_unsigned1   = `Unsigned;
+                    muldiv_start_o      =  1'b1;
+                    mul_or_div_o        =  `DIV;
+                    muldiv_dividend_o   =  operand1_i;
+                    muldiv_divisor_o    =  operand2_i;
+                    muldiv_reg1_sign_o  = `Unsigned;
+                    muldiv_reg2_sign_o  = `Unsigned;
                 end
                 `EXE_MUL,`EXE_MULHU  : begin
-                    muldiv_start_o                  =  1'b1;
-                    mul_or_div_o                    =  `MUL;
-                    muldiv_dividend_o               =  operand1_i;
-                    muldiv_divisor_o                =  operand2_i;
-                    muldiv_reg1_signed0_unsigned1   = `Unsigned;
-                    muldiv_reg2_signed0_unsigned1   = `Unsigned;
+                    muldiv_start_o      =  1'b1;
+                    mul_or_div_o        =  `MUL;
+                    muldiv_dividend_o   =  operand1_i;
+                    muldiv_divisor_o    =  operand2_i;
+                    muldiv_reg1_sign_o  = `Unsigned;
+                    muldiv_reg2_sign_o  = `Unsigned;
                 end
                 `EXE_MULH:  begin
-                    muldiv_start_o                  =  1'b1;
-                    mul_or_div_o                    =  `MUL;
-                    muldiv_dividend_o               =  operand1_i;
-                    muldiv_divisor_o                =  operand2_i;
-                    muldiv_reg1_signed0_unsigned1   = `Signed;
-                    muldiv_reg2_signed0_unsigned1   = `Signed;
+                    muldiv_start_o      =  1'b1;
+                    mul_or_div_o        =  `MUL;
+                    muldiv_dividend_o   =  operand1_i;
+                    muldiv_divisor_o    =  operand2_i;
+                    muldiv_reg1_sign_o  = `Signed;
+                    muldiv_reg2_sign_o  = `Signed;
                 end
                 `EXE_MULHSU: begin
-                    muldiv_start_o                  =  1'b1;
-                    mul_or_div_o                    =  `MUL;
-                    muldiv_dividend_o               =  operand1_i;
-                    muldiv_divisor_o                =  operand2_i;
-                    muldiv_reg1_signed0_unsigned1   = `Signed;
-                    muldiv_reg2_signed0_unsigned1   = `Unsigned;
+                    muldiv_start_o      =  1'b1;
+                    mul_or_div_o        =  `MUL;
+                    muldiv_dividend_o   =  operand1_i;
+                    muldiv_divisor_o    =  operand2_i;
+                    muldiv_reg1_sign_o  = `Signed;
+                    muldiv_reg2_sign_o  = `Unsigned;
                 end
                 `EXE_ADD: begin
-                    arithresult                     = operand1_i + operand2_i;
+                    arithresult         = operand1_i + operand2_i;
                 end 
                 `EXE_SUB: begin
-                    arithresult                     = operand1_i - operand2_i;
+                    arithresult         = operand1_i - operand2_i;
                 end
                 default: begin
-                    muldiv_start_o                  =  1'b0;
-                    mul_or_div_o                    =  `MUL;
-                    muldiv_dividend_o               =  `ZeroWord;
-                    muldiv_divisor_o                =  `ZeroWord;
-                    muldiv_reg1_signed0_unsigned1   = `Unsigned;
-                    muldiv_reg2_signed0_unsigned1   = `Unsigned; 
-                    arithresult                     = `ZeroWord;
+                    muldiv_start_o      =  1'b0;
+                    mul_or_div_o        =  `MUL;
+                    muldiv_dividend_o   =  `ZeroWord;
+                    muldiv_divisor_o    =  `ZeroWord;
+                    muldiv_reg1_sign_o  = `Unsigned;
+                    muldiv_reg2_sign_o  = `Unsigned; 
+                    arithresult         = `ZeroWord;
                 end
             endcase
         end
@@ -198,12 +193,12 @@ module ex(
 
     // aluop 传递到 访存阶段
     always @(*) begin
-            ex_aluop_o  = aluop_i;
-            ex_operand2_o   = operand2_i; 
+            aluop_o  = aluop_i;
+            operand2_o   = operand2_i; 
             case (alusel_i)
-                `EXE_RES_LOAD:  ex_mem_addr_o   = (operand1_i + {{20{ex_inst[31]}}, ex_inst[31:20]});
-                `EXE_RES_STORE: ex_mem_addr_o   = (operand1_i + {{20{ex_inst[31]}}, ex_inst[31:25], ex_inst[11:7]});
-                default:        ex_mem_addr_o   = `ZeroWord;
+                `EXE_RES_LOAD:  memaddr_o   = (operand1_i + {{20{inst_i[31]}}, inst_i[31:20]});
+                `EXE_RES_STORE: memaddr_o   = (operand1_i + {{20{inst_i[31]}}, inst_i[31:25], inst_i[11:7]});
+                default:        memaddr_o   = `ZeroWord;
             endcase
     end
 
@@ -254,56 +249,56 @@ module ex(
             `EXE_BEQ: begin
                 if (operand1_i == operand2_i) begin
                     branch_flag   = `BranchEnable;
-                    branch_addr   = ex_pc + {{20{ex_inst[31]}}, ex_inst[7], ex_inst[30:25], ex_inst[11:8], 1'b0};
+                    branch_addr   = pc_i + {{20{inst_i[31]}}, inst_i[7], inst_i[30:25], inst_i[11:8], 1'b0};
                 end
             end 
             `EXE_BNE: begin
                 if (operand1_i != operand2_i) begin
                     branch_flag   = `BranchEnable;
-                    branch_addr   = ex_pc + {{20{ex_inst[31]}}, ex_inst[7], ex_inst[30:25], ex_inst[11:8], 1'b0};
+                    branch_addr   = pc_i + {{20{inst_i[31]}}, inst_i[7], inst_i[30:25], inst_i[11:8], 1'b0};
                 end
             end
             `EXE_BLT: begin
                 if (operand1_i[31] != operand2_i[31]) begin
                     branch_flag   = (operand1_i[31] ? `BranchEnable : `BranchDisable);
-                    branch_addr   = ex_pc + {{20{ex_inst[31]}}, ex_inst[7], ex_inst[30:25], ex_inst[11:8], 1'b0};
+                    branch_addr   = pc_i + {{20{inst_i[31]}}, inst_i[7], inst_i[30:25], inst_i[11:8], 1'b0};
                 end else if (operand1_i < operand2_i) begin
                     branch_flag   = `BranchEnable;
-                    branch_addr   = ex_pc + {{20{ex_inst[31]}}, ex_inst[7], ex_inst[30:25], ex_inst[11:8], 1'b0}; 
+                    branch_addr   = pc_i + {{20{inst_i[31]}}, inst_i[7], inst_i[30:25], inst_i[11:8], 1'b0}; 
                 end
             end
             `EXE_BGE: begin
                 if (operand1_i[31] != operand2_i[31]) begin
                     branch_flag   = (operand1_i[31] ? `BranchDisable : `BranchEnable);
-                    branch_addr   = ex_pc + {{20{ex_inst[31]}}, ex_inst[7], ex_inst[30:25], ex_inst[11:8], 1'b0};
+                    branch_addr   = pc_i + {{20{inst_i[31]}}, inst_i[7], inst_i[30:25], inst_i[11:8], 1'b0};
                 end else if (operand1_i < operand2_i) begin
                 end else begin
                     branch_flag   = `BranchEnable;
-                    branch_addr   = ex_pc + {{20{ex_inst[31]}}, ex_inst[7], ex_inst[30:25], ex_inst[11:8], 1'b0};
+                    branch_addr   = pc_i + {{20{inst_i[31]}}, inst_i[7], inst_i[30:25], inst_i[11:8], 1'b0};
                 end
             end
             `EXE_BLTU: begin
                 if (operand1_i < operand2_i) begin
                     branch_flag   = `BranchEnable;
-                    branch_addr   = ex_pc + {{20{ex_inst[31]}}, ex_inst[7], ex_inst[30:25], ex_inst[11:8], 1'b0};
+                    branch_addr   = pc_i + {{20{inst_i[31]}}, inst_i[7], inst_i[30:25], inst_i[11:8], 1'b0};
                 end
             end
             `EXE_BGEU: begin
                 if (operand1_i < operand2_i) begin
                 end else begin
                     branch_flag   = `BranchEnable;
-                    branch_addr   = ex_pc + {{20{ex_inst[31]}}, ex_inst[7], ex_inst[30:25], ex_inst[11:8], 1'b0};
+                    branch_addr   = pc_i + {{20{inst_i[31]}}, inst_i[7], inst_i[30:25], inst_i[11:8], 1'b0};
                 end
             end
             `EXE_JAL:  begin
                 branch_flag     = `BranchEnable;
-                branch_addr     = ex_pc + {{12{ex_inst[31]}}, ex_inst[19:12], ex_inst[20], ex_inst[30:21], 1'b0};
-                branchres       = ex_pc + 4'h4;
+                branch_addr     = pc_i + {{12{inst_i[31]}}, inst_i[19:12], inst_i[20], inst_i[30:21], 1'b0};
+                branchres       = pc_i + 4'h4;
             end
             `EXE_JALR: begin
                 branch_flag     = `BranchEnable;
-                branch_addr     = (operand1_i + {{20{ex_inst[31]}}, ex_inst[31:20]}) & (32'hfffffffe);
-                branchres       = ex_pc + 4'h4;
+                branch_addr     = (operand1_i + {{20{inst_i[31]}}, inst_i[31:20]}) & (32'hfffffffe);
+                branchres       = pc_i + 4'h4;
             end
             default: begin
                 branch_flag     = `BranchDisable;
@@ -314,14 +309,14 @@ module ex(
     end
 
     // csrr
-	assign wcsr_reg_o =  (int_assert_i == `INT_ASSERT)? `WriteDisable   :   wcsr_reg_i;    
-    assign wd_csr_reg_o = wd_csr_reg_i;
+	assign wcsr_o = (int_assert_i == `INT_ASSERT) ? `WriteDisable : wcsr_i;    
+    assign wcsr_addr_o = wcsr_addr_i;
 
     always @(*) begin
         case (aluop_i)
             `EXE_CSRRW: wcsr_data_o = operand1_i;
-            `EXE_CSRRS: wcsr_data_o = csr_reg_i | operand1_i;
-            `EXE_CSRRC: wcsr_data_o = csr_reg_i & (~operand1_i);
+            `EXE_CSRRS: wcsr_data_o = csr_data_i | operand1_i;
+            `EXE_CSRRC: wcsr_data_o = csr_data_i & (~operand1_i);
             default:    wcsr_data_o = `ZeroWord;
         endcase
     end
@@ -329,16 +324,16 @@ module ex(
 
     // 2. 根据 alusel_i 指示的运算类型，选择一个运算结果作为最终结果
     always @ (*) begin
-        wd    = wd_i;    // wd_o 等于 wd_i, 要写的目的寄存器地址
-        wreg  = wreg_i;  // wreg_o 等于 wreg_i,表示是否要写目的寄存器
+        wreg      = wreg_i;         // wreg_o 等于 wreg_i,表示是否要写目的寄存器
+        wreg_addr = wreg_addr_i;    // wreg_addr_o 等于 wreg_addr_i, 要写的目的寄存器地址
         case (alusel_i)
-            `EXE_RES_LOGIC:     wdata = logicout;    // wdata_o 中存放运算结果
-            `EXE_RES_COMPARE:   wdata = compare;  
-            `EXE_RES_SHIFT:     wdata = shiftres;
-            `EXE_RES_ARITH:     wdata = arithresult;
-            `EXE_RES_BRANCH:    wdata = branchres;
-            `EXE_RES_CSR:       wdata = csr_reg_i;
-            default:            wdata = `ZeroWord;
+            `EXE_RES_LOGIC:     wreg_data = logicout;    // wreg_data_o 中存放运算结果
+            `EXE_RES_COMPARE:   wreg_data = compare;  
+            `EXE_RES_SHIFT:     wreg_data = shiftres;
+            `EXE_RES_ARITH:     wreg_data = arithresult;
+            `EXE_RES_BRANCH:    wreg_data = branchres;
+            `EXE_RES_CSR:       wreg_data = csr_data_i;
+            default:            wreg_data = `ZeroWord;
         endcase
     end
 

@@ -27,7 +27,7 @@ SOFTWARE.
 
 module csr_reg(
     input   wire                clk,
-    input   wire                rst,
+    input   wire                rst_n,
 
     // write from ex
     input   wire                we_i,
@@ -92,8 +92,8 @@ module csr_reg(
     assign interrupt_csr_mepc = csr_mepc;
     assign interrupt_csr_mstatus = csr_mstatus;
 
-    always @ (posedge clk or negedge rst) begin
-        if (rst == `RstEnable) begin
+    always @ (posedge clk or negedge rst_n) begin
+        if (rst_n == `RstEnable) begin
             csr_mcycle  <= {`ZeroWord, `ZeroWord};
         end 
         else if (we_i == `WriteEnable) begin
@@ -114,8 +114,8 @@ module csr_reg(
     end
 
     // write  regs
-    always @ (posedge clk or negedge rst) begin
-        if (rst == `RstEnable) begin
+    always @ (posedge clk or negedge rst_n) begin
+        if (rst_n == `RstEnable) begin
             csr_mstatus     <= `ZeroWord;
             csr_misa        <= (`MISA_RV32 | `MISA_RVI);
             csr_mie         <= `ZeroWord;

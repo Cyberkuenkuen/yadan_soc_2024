@@ -86,7 +86,7 @@ module yadan_riscv_sopc(
         
 yadan_riscv  u_yadan_riscv (
     .clk                     ( clk          ),
-    .rst                     ( rst          ),
+    .rst_n                   ( rst          ),
     // .set_mode                ( 1'b0     ),
     .int_i                   (  6'b0     ),//intn 
     .M0_HGRANT                ( M0_HGRANT     ),
