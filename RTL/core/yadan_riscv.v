@@ -525,20 +525,19 @@ module yadan_riscv(
         
         // to id
         .rdata_o            (csr_data),
-
-        .interrupt_csr_mtvec  (csr_mtvec),
-        .interrupt_csr_mepc   (csr_mepc),
-        .interrupt_csr_mstatus(csr_mstatus),
-
+        
         // to interrupt_ctrl
-        .global_int_en_o(global_int_en),
+        .global_int_en_o        (global_int_en),
+        .interrupt_csr_mtvec    (csr_mtvec),
+        .interrupt_csr_mepc     (csr_mepc),
+        .interrupt_csr_mstatus  (csr_mstatus),
+        .interrupt_data_o       (csr_interrupt_data_o),
 
         // from interrupt_ctrl
         .interrupt_we_i(interrupt_we_o),
         .interrupt_raddr_i(interrupt_raddr_o),
         .interrupt_waddr_i(interrupt_waddr_o),
-        .interrupt_data_i(interrupt_data_o),
-        .interrupt_data_o(csr_interrupt_data_o)
+        .interrupt_data_i(interrupt_data_o)
     );
 
     
@@ -547,28 +546,36 @@ module yadan_riscv(
    interrupt_ctrl u_interrupt_ctrl(
         .clk                (clk),
         .rst_n              (rst_n),
-        .global_int_en_i    (global_int_en),  //
+        
+        // top input
         .int_flag_i         (int_flag_i),
-        .inst_i             (id_inst),//
-        .inst_addr_i        (id_pc), //
-        //.inst_ex_i(id_inst), //
+        
+        // from id
+        .inst_i             (id_inst),
+        .inst_addr_i        (id_pc),
+        
+        // from ex
         .branch_flag_i      (ex_branch_flag),
         .branch_addr_i      (ex_branch_addr),
-        .div_i              (enable_in),//
+        .div_i              (enable_in),
 
-        //.data_i(csr_interrupt_data_o),
+        // from csr_reg
+        .global_int_en_i    (global_int_en),
         .csr_mtvec          (csr_mtvec),
         .csr_mepc           (csr_mepc),
         .csr_mstatus        (csr_mstatus),
+        // .data_i             (csr_interrupt_data_o),
 
-        .stallreq_interrupt_o(stallreq_from_interrupt),
-
+        // to csr_reg
         .we_o               (interrupt_we_o),
         .waddr_o            (interrupt_waddr_o),
-        .raddr_o            (interrupt_raddr_o),
+        // .raddr_o            (interrupt_raddr_o),
         .data_o             (interrupt_data_o),
         .int_addr_o         (interrupt_int_addr_o),
-        .int_assert_o       (interrupt_int_assert_o)
+        .int_assert_o       (interrupt_int_assert_o),
+        
+        // to ctrl
+        .stallreq_interrupt_o(stallreq_from_interrupt)
    );
 
     cpu_ahb_if u_cpu_ahb_if(
