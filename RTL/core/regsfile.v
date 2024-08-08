@@ -28,21 +28,21 @@ SOFTWARE.
 module regsfile
 (
     input   wire        clk,
-    input   wire        rst,
+    input   wire        rst_n,
 
-    input wire int_assert_i,                // 中断发生标志
+    input   wire        int_assert_i,                // 中断发生标志
 
-    // write port 回写
+    // write port, from mem_wb (wb)
     input   wire                we_i,   
     input   wire[`RegAddrBus]   waddr_i,
     input   wire[`RegBus]       wdata_i,
 
-    // read port 1
+    // read port 1, from/to id
     input   wire                re1_i,
     input   wire[`RegAddrBus]   raddr1_i,
     output  wire[`RegBus]       rdata1_o,
 
-    // read port 2
+    // read port 2, from/to id
     input   wire                re2_i,
     input   wire[`RegAddrBus]   raddr2_i,
     output  wire[`RegBus]       rdata2_o
@@ -66,8 +66,8 @@ module regsfile
 
     generate
         for(i=0; i < `RegNum; i=i+1) begin
-            always @(posedge clk or negedge rst) begin
-                if(rst == `RstEnable)
+            always @(posedge clk or negedge rst_n) begin
+                if(rst_n == `RstEnable)
                     reg_Q[i] <= `ZeroWord;
                 else if(we_Q[i] && (we_i == `WriteEnable)) 
                     reg_Q[i] <= wdata_i;

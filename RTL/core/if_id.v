@@ -27,32 +27,35 @@ SOFTWARE.
 
 module if_id(
     input   wire        clk,  
-    input   wire        rst,
+    input   wire        rst_n,
 
-    // 来自取指阶段的信号
-    input   wire[`InstAddrBus]      pc_i,
-    input   wire[`InstBus]          inst_i,
+    // from if
+    input   wire[`InstAddrBus]      pc_i,   // from pc_reg
+    input   wire[`InstBus]          inst_i, // from cpu_ahb_if
 
+    // from ex
     input   wire                    ex_branch_flag_i,
-    input   wire[4:0]               stalled,
 
-    // 对应译码阶段的信号
+    // from ctrl
+    input   wire[4:0]               stalled_i,
+
+    // to id
     output  reg[`InstAddrBus]       pc_o,
     output  reg[`InstBus]           inst_o
 );
 
-    always @ (posedge clk or negedge rst)  begin
-        if (rst == `RstEnable) begin
+    always @(posedge clk or negedge rst_n) begin
+        if (rst_n == `RstEnable) begin
             pc_o    <= `ZeroWord;
             inst_o  <= `ZeroWord;
         end else begin
             if (ex_branch_flag_i == `BranchEnable) begin
                 pc_o    <= pc_i;
                 inst_o  <= `ZeroWord;
-            end else if (stalled[1] == `NoStop) begin
+            end else if (stalled_i[1] == `NoStop) begin
                 pc_o    <= pc_i;
                 inst_o  <= inst_i;
-            end else if (stalled[2] == `NoStop) begin
+            end else if (stalled_i[2] == `NoStop) begin
                 inst_o  <= `ZeroWord;
             end //else 保持不变
         end

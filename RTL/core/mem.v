@@ -26,176 +26,175 @@ SOFTWARE.
 `include "yadan_defs.v"
 
 module mem(
-    input   wire            rst,
-
-    // 来自执行阶段的信息 from ex
-    input   wire[`RegAddrBus]   wd_i,
+    // from ex_mem
+    input   wire[`RegAddrBus]   wreg_addr_i,
     input   wire                wreg_i,
-    input   wire[`RegBus]       wdata_i,
+    input   wire[`RegBus]       wreg_data_i,
 
-    input   wire[`AluOpBus]     mem_aluop_i,
-    input   wire[`DataAddrBus]  mem_mem_addr_i,
-    input   wire[`RegBus]       mem_reg2_i,
+    input   wire[`AluOpBus]     aluop_i,
+    input   wire[`DataAddrBus]  memaddr_i,
+    input   wire[`RegBus]       operand2_i,
 
+    //
     input wire int_assert_i,                // 中断发生标志
     // input wire[`InstAddrBus] int_addr_i,    // 中断跳转地址
 
-    // from ram 
-    input   wire[`DataBus]      mem_data_i,
+    // from cpu_ahb_mem
+    input   wire[`DataBus]      ram_data_i,
 
-    // to ram 
-    output  reg[`DataAddrBus]   mem_addr_o,
-    output  wire                mem_we_o,
-    output  reg[2:0]            mem_sel_o,
-    output  reg[`DataBus]       mem_data_o,
-    output  wire                 mem_ce_o,
+    // to cpu_ahb_mem 
+    output  reg[`DataAddrBus]   ram_addr_o,
+    output  wire                ram_we_o,
+    output  reg[2:0]            ram_sel_o,
+    output  reg[`DataBus]       ram_data_o,
+    output  wire                ram_ce_o,
 
-    // 访存阶段的结果
-    output  reg[`RegAddrBus]    wd_o,
+    // to mem_wb
     output  reg                 wreg_o,
-    output  reg[`RegBus]        wdata_o
+    output  reg[`RegAddrBus]    wreg_addr_o,
+    output  reg[`RegBus]        wreg_data_o
 );
 
-    reg         mem_we;
-    reg         mem_ce;
+    reg         ram_we;
+    reg         ram_ce;
 
-    assign  mem_we_o = mem_we;//(int_assert_i == `INT_ASSERT)?`WriteDisable : mem_we;
-    assign  mem_ce_o = mem_ce;//(int_assert_i == `INT_ASSERT)?`Disable : mem_ce;
+    assign  ram_we_o = ram_we;//(int_assert_i == `INT_ASSERT)?`WriteDisable : ram_we;
+    assign  ram_ce_o = ram_ce;//(int_assert_i == `INT_ASSERT)?`Disable : ram_ce;
 
-    always  @ (*)   begin
-            wd_o        = wd_i;
-            wreg_o      = wreg_i;
-            wdata_o     = wdata_i;
-            mem_addr_o  = mem_mem_addr_i;
-            mem_we      = `WriteDisable;
-            mem_sel_o   = 3'b010;
-            mem_data_o  = `ZeroWord;
-            mem_ce    = `Disable;
-            case (mem_aluop_i)
-                `EXE_LB: begin          // lb
+    always @(*) begin
+        wreg_addr_o = wreg_addr_i;
+        wreg_o      = wreg_i;
+        wreg_data_o = wreg_data_i;
+        ram_addr_o  = memaddr_i;
+        ram_we      = `WriteDisable;
+        ram_sel_o   = 3'b010;
+        ram_data_o  = `ZeroWord;
+        ram_ce      = `Disable;
+        case (aluop_i)
+            `EXE_LB: begin          // lb
 
-                    mem_we      = `WriteDisable;
-                    mem_ce    = `Enable;
-                    mem_sel_o   = 3'b000;
+                ram_we      = `WriteDisable;
+                ram_ce      = `Enable;
+                ram_sel_o   = 3'b000;
 
-                    case (mem_mem_addr_i[1:0])
-                        2'b00: begin
-                            wdata_o = {{24{mem_data_i[7]}}, mem_data_i[7:0]};
-                        end 
-                        2'b01: begin
-                            wdata_o = {{24{mem_data_i[15]}}, mem_data_i[15:8]};
-                        end
-                        2'b10: begin
-                            wdata_o = {{24{mem_data_i[23]}}, mem_data_i[23:16]};
-                        end
-                        2'b11: begin
-                            wdata_o = {{24{mem_data_i[31]}}, mem_data_i[31:24]};
-                        end
-                        default: begin
-                            wdata_o = `ZeroWord;
-                        end
-                    endcase                   
-                end
-                `EXE_LH: begin          // lh
+                case (memaddr_i[1:0])
+                    2'b00: begin
+                        wreg_data_o = {{24{ram_data_i[7]}}, ram_data_i[7:0]};
+                    end 
+                    2'b01: begin
+                        wreg_data_o = {{24{ram_data_i[15]}}, ram_data_i[15:8]};
+                    end
+                    2'b10: begin
+                        wreg_data_o = {{24{ram_data_i[23]}}, ram_data_i[23:16]};
+                    end
+                    2'b11: begin
+                        wreg_data_o = {{24{ram_data_i[31]}}, ram_data_i[31:24]};
+                    end
+                    default: begin
+                        wreg_data_o = `ZeroWord;
+                    end
+                endcase                   
+            end
+            `EXE_LH: begin          // lh
 
-                    mem_we      = `WriteDisable;
-                    mem_ce    = `Enable;
-                    mem_sel_o   = 3'b001;
+                ram_we      = `WriteDisable;
+                ram_ce      = `Enable;
+                ram_sel_o   = 3'b001;
 
-                    case (mem_mem_addr_i[1:0])
-                        2'b00: begin
-                            wdata_o = {{16{mem_data_i[15]}}, mem_data_i[15:0]};
-                        end 
-                        2'b10: begin
-                            wdata_o = {{16{mem_data_i[31]}}, mem_data_i[31:16]};
-                        end
-                        default: begin
-                            wdata_o = `ZeroWord;
-                        end
-                    endcase
-                end
-                `EXE_LW: begin          // lw
+                case (memaddr_i[1:0])
+                    2'b00: begin
+                        wreg_data_o = {{16{ram_data_i[15]}}, ram_data_i[15:0]};
+                    end 
+                    2'b10: begin
+                        wreg_data_o = {{16{ram_data_i[31]}}, ram_data_i[31:16]};
+                    end
+                    default: begin
+                        wreg_data_o = `ZeroWord;
+                    end
+                endcase
+            end
+            `EXE_LW: begin          // lw
 
-                    mem_we      = `WriteDisable;
-                    mem_ce    = `Enable;
-                    wdata_o     = mem_data_i;
+                ram_we      = `WriteDisable;
+                ram_ce      = `Enable;
+                wreg_data_o = ram_data_i;
 
-                end
-                `EXE_LBU: begin         // lbu
+            end
+            `EXE_LBU: begin         // lbu
 
-                    mem_we      = `WriteDisable;
-                    mem_ce    = `Enable;
-                    mem_sel_o   = 3'b000;
+                ram_we      = `WriteDisable;
+                ram_ce      = `Enable;
+                ram_sel_o   = 3'b000;
 
-                    case (mem_mem_addr_i[1:0])
-                        2'b00: begin
-                            wdata_o = {24'h0, mem_data_i[7:0]};
-                        end 
-                        2'b01: begin
-                            wdata_o = {24'h0, mem_data_i[15:8]};
-                        end
-                        2'b10: begin
-                            wdata_o = {24'h0, mem_data_i[23:16]};
-                        end
-                        2'b11: begin
-                            wdata_o = {24'h0, mem_data_i[31:24]};
-                        end
-                        default: begin
-                            wdata_o = `ZeroWord;
-                        end
-                    endcase
-                end
-                `EXE_LHU: begin         // lhu
+                case (memaddr_i[1:0])
+                    2'b00: begin
+                        wreg_data_o = {24'h0, ram_data_i[7:0]};
+                    end 
+                    2'b01: begin
+                        wreg_data_o = {24'h0, ram_data_i[15:8]};
+                    end
+                    2'b10: begin
+                        wreg_data_o = {24'h0, ram_data_i[23:16]};
+                    end
+                    2'b11: begin
+                        wreg_data_o = {24'h0, ram_data_i[31:24]};
+                    end
+                    default: begin
+                        wreg_data_o = `ZeroWord;
+                    end
+                endcase
+            end
+            `EXE_LHU: begin         // lhu
 
-                    mem_we      = `WriteDisable;
-                    mem_ce    = `Enable;
-                    mem_sel_o   = 3'b001;
+                ram_we      = `WriteDisable;
+                ram_ce      = `Enable;
+                ram_sel_o   = 3'b001;
 
-                    case (mem_mem_addr_i[1:0])
-                        2'b00: begin
-                            wdata_o = {16'h0, mem_data_i[15:0]};
-                        end 
-                        2'b10: begin
-                            wdata_o = {16'h0, mem_data_i[31:16]};
-                        end
-                        default: begin
-                            wdata_o = `ZeroWord;
-                        end
-                    endcase   
-                end
-                `EXE_SB : begin         // sb
+                case (memaddr_i[1:0])
+                    2'b00: begin
+                        wreg_data_o = {16'h0, ram_data_i[15:0]};
+                    end 
+                    2'b10: begin
+                        wreg_data_o = {16'h0, ram_data_i[31:16]};
+                    end
+                    default: begin
+                        wreg_data_o = `ZeroWord;
+                    end
+                endcase   
+            end
+            `EXE_SB : begin         // sb
 
-                    mem_we      = `WriteEnable;
-                    mem_ce    =  `Enable;
-                    mem_data_o  = {24'h000000, mem_reg2_i[7:0]};
-                    mem_sel_o   = 3'b000;
-                    wdata_o     = wdata_i;
-                   
-                end
-                `EXE_SH: begin          // sh
+                ram_we      = `WriteEnable;
+                ram_ce      =  `Enable;
+                ram_data_o  = {24'h000000, operand2_i[7:0]};
+                ram_sel_o   = 3'b000;
+                wreg_data_o = wreg_data_i;
+                
+            end
+            `EXE_SH: begin          // sh
 
-                    mem_we      = `WriteEnable;
-                    mem_ce    =  `Enable; 
-                    mem_data_o  = {mem_reg2_i[15:0], mem_reg2_i[15:0]};
-                    mem_sel_o   = 3'b001;
-                    wdata_o     = wdata_i;
-                    
-                end
-                `EXE_SW: begin          // sw
+                ram_we      = `WriteEnable;
+                ram_ce      =  `Enable; 
+                ram_data_o  = {operand2_i[15:0], operand2_i[15:0]};
+                ram_sel_o   = 3'b001;
+                wreg_data_o = wreg_data_i;
+                
+            end
+            `EXE_SW: begin          // sw
 
-                    mem_we      = `WriteEnable;
-                    mem_ce    = `Enable;
-                    mem_data_o  = mem_reg2_i;
-                    mem_sel_o   = 3'b010;
-                    wdata_o     = wdata_i;
-                end
+                ram_we      = `WriteEnable;
+                ram_ce      = `Enable;
+                ram_data_o  = operand2_i;
+                ram_sel_o   = 3'b010;
+                wreg_data_o = wreg_data_i;
+            end
 
-                default: begin
-                    mem_we      = `WriteDisable;
-                    mem_ce    = `Disable;
-                    mem_sel_o   = 3'b000;
-                end
-            endcase
+            default: begin
+                ram_we      = `WriteDisable;
+                ram_ce      = `Disable;
+                ram_sel_o   = 3'b000;
+            end
+        endcase
     end
 
 endmodule // mem

@@ -26,33 +26,40 @@ SOFTWARE.
 `include "yadan_defs.v"
 
 module pc_reg(
-    input       wire                clk,
-    input       wire                rst,
-    input       wire                PCchange_enable,
+    input   wire             clk,
+    input   wire             rst_n,
 
-    input       wire                branch_flag_i,
-    input       wire[`RegBus]       branch_addr_i,
-    input       wire[4:0]           stalled,
+    // from mem
+    input   wire             PCchange_enable_i,
 
-    output      reg[`InstAddrBus]   pc_o,
-    output      wire                ce_o 
+    // from ex
+    input   wire             ex_branch_flag_i,
+    input   wire[`RegBus]    ex_branch_addr_i,
+
+    // from ctrl
+    input   wire[4:0]        stalled_i,
+
+    // to if_id
+    output  reg[`InstAddrBus]pc_o,
+    
+    // to cpu_ahb_if
+    output  wire             ce_o
 );
 
-    assign  ce_o = PCchange_enable;
+    assign  ce_o = PCchange_enable_i;
 
-    always @(posedge clk or negedge rst) begin
-        if(rst == `RstEnable) begin
-            pc_o    <=  `StartAdd;
-        end       
-        else begin
-            if(branch_flag_i == `BranchEnable) begin
-                    pc_o    <= branch_addr_i;
+    always @(posedge clk or negedge rst_n) begin
+        if(rst_n == `RstEnable) begin
+            pc_o <= `StartAdd;
+        end else begin
+            if(ex_branch_flag_i == `BranchEnable) begin
+                pc_o <= ex_branch_addr_i;
             // 优先根据跳转信号更新pc，如果在取指阶段发生流水线停顿，跳转信号不会因此丢失
-            end else if(stalled[0] == `NoStop) begin
+            end else if(stalled_i[0] == `NoStop) begin
                 if(pc_o < `INSTADD_END) begin
-                    pc_o  <= pc_o + 4'h4;
+                    pc_o <= pc_o + 4'h4;
                 end else begin
-                    pc_o  <=  `StartAdd;
+                    pc_o <= `StartAdd;
                 end
             end else begin
                 pc_o  <=  pc_o;
