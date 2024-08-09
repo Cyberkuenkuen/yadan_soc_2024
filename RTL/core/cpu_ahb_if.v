@@ -26,32 +26,32 @@ SOFTWARE.
 `include "yadan_defs.v"
 
 module cpu_ahb_if (
-    input   wire                clk,
-    input   wire                rst_n,
+    input   wire            clk,
+    input   wire            rst_n,
 
     // cpu侧接口
-    input   wire [31:0]         cpu_addr_i,
-    input   wire                cpu_ce_i,
-    input   wire                cpu_we_i,
-    input   wire [31:0]         cpu_writedata_i,
-    input   wire [2:0]          cpu_sel_i,
+    input   wire [31:0]     cpu_addr_i,
+    input   wire            cpu_ce_i,
+    input   wire            cpu_we_i,
+    input   wire [31:0]     cpu_writedata_i,
+    input   wire [2:0]      cpu_sel_i,
 
-    output  reg  [31:0]         cpu_readdata_o,
+    output  reg  [31:0]     cpu_readdata_o,
 
     // AHB总线端接口
-    input   wire                M_HGRANT,
-    input   wire [31:0]         M_HRDATA,
+    input   wire            M_HGRANT,
+    input   wire [31:0]     M_HRDATA,
 
-    output  reg                 M_HBUSREQ,
-    output  reg  [31:0]         M_HADDR,
-    output  reg  [ 1:0]         M_HTRANS,
-    output  reg  [ 2:0]         M_HSIZE,
-    output  reg  [ 2:0]         M_HBURST,
-    output  reg                 M_HWRITE,
-    output  reg  [31:0]         M_HWDATA,
+    output  reg             M_HBUSREQ,
+    output  reg  [31:0]     M_HADDR,
+    output  reg  [ 1:0]     M_HTRANS,
+    output  reg  [ 2:0]     M_HSIZE,
+    output  reg  [ 2:0]     M_HBURST,
+    output  reg             M_HWRITE,
+    output  reg  [31:0]     M_HWDATA,
     
     // to ctrl
-    output  reg                 stallreq
+    output  reg             stallreq
 );
 
     localparam  IDLE    = 3'b000, 

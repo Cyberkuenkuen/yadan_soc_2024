@@ -45,6 +45,8 @@ def main():
     iverilog_cmd.append(core_dir + r'/csr_reg.v')
     iverilog_cmd.append(core_dir + r'/cpu_ahb_if.v')
     iverilog_cmd.append(core_dir + r'/cpu_ahb_mem.v')
+
+    iverilog_cmd.append(core_dir + r'/interrupt_ctrl.v')
     
     # periphery 没加完
     iverilog_cmd.append(periphery_dir + r'/amba_ahb_m2s5.v')

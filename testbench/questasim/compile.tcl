@@ -22,12 +22,3 @@ foreach filename [lrange ${hierarchy_files} 0 end-1] {
 
 #Compile testbench
 vlog -work work ${TB_FILE}
-
-#Open the simulation
-vsim work.yadan_riscv_sopc_tb -voptargs=+acc
-
-#Load the waveform.
-# do wave.do
-
-#Run simulation
-run 1000000 ns
