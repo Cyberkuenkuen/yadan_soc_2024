@@ -118,7 +118,7 @@ module yadan_riscv(
     wire[`DataAddrBus]      id_ex_wcsr_addr;
 
     // from ex to mul_div    
-    wire                    enable_in;
+    wire                    muldiv_start;
     wire[`RegBus]           dividend;        
     wire[`RegBus]           divisor;        
     wire                    mul0_div1;
@@ -189,7 +189,6 @@ module yadan_riscv(
     // interrupt 模块输出
     wire interrupt_we_o;
     wire[`DataAddrBus] interrupt_waddr_o;
-    wire[`DataAddrBus] interrupt_raddr_o;
     wire[`RegBus] interrupt_data_o;
     wire[`InstAddrBus] interrupt_int_addr_o;
     wire interrupt_int_assert_o;
@@ -378,7 +377,7 @@ module yadan_riscv(
         .muldiv_done_i      (muldiv_done),
         
         // to mul_div
-        .muldiv_start_o     (enable_in),
+        .muldiv_start_o     (muldiv_start),
         .muldiv_dividend_o  (dividend),
         .muldiv_divisor_o   (divisor),
         .mul_or_div_o       (mul0_div1),
@@ -409,7 +408,7 @@ module yadan_riscv(
         .clk                (clk),
         .reset_n            (rst_n),
         // input
-        .enable_in          (enable_in),
+        .enable_in          (muldiv_start),
         .x                  (dividend),
         .y                  (divisor),
         .mul0_div1          (mul0_div1),
@@ -500,7 +499,7 @@ module yadan_riscv(
 
     ctrl u_ctrl(
         .stallreq_from_id_i         (stallreq_from_id),
-        .stallreq_from_ex_i         (enable_in),
+        .stallreq_from_ex_i         (muldiv_start),
         .stallreq_from_mem_i        (stallreq_from_mem),
         .stallreq_from_if_i         (stallreq_from_if),
         .stallreq_from_interrupt_i  (stallreq_from_interrupt),
@@ -531,11 +530,11 @@ module yadan_riscv(
         .interrupt_csr_mtvec    (csr_mtvec),
         .interrupt_csr_mepc     (csr_mepc),
         .interrupt_csr_mstatus  (csr_mstatus),
-        .interrupt_data_o       (csr_interrupt_data_o),
+        // .interrupt_data_o       (csr_interrupt_data),
 
         // from interrupt_ctrl
         .interrupt_we_i(interrupt_we_o),
-        .interrupt_raddr_i(interrupt_raddr_o),
+        // .interrupt_raddr_i(interrupt_raddr),
         .interrupt_waddr_i(interrupt_waddr_o),
         .interrupt_data_i(interrupt_data_o)
     );
@@ -557,19 +556,19 @@ module yadan_riscv(
         // from ex
         .branch_flag_i      (ex_branch_flag),
         .branch_addr_i      (ex_branch_addr),
-        .div_i              (enable_in),
+        .muldiv_start_i     (muldiv_start),
 
         // from csr_reg
         .global_int_en_i    (global_int_en),
         .csr_mtvec          (csr_mtvec),
         .csr_mepc           (csr_mepc),
         .csr_mstatus        (csr_mstatus),
-        // .data_i             (csr_interrupt_data_o),
+        // .data_i             (csr_interrupt_data),
 
         // to csr_reg
         .we_o               (interrupt_we_o),
         .waddr_o            (interrupt_waddr_o),
-        // .raddr_o            (interrupt_raddr_o),
+        // .raddr_o            (interrupt_raddr),
         .data_o             (interrupt_data_o),
         .int_addr_o         (interrupt_int_addr_o),
         .int_assert_o       (interrupt_int_assert_o),

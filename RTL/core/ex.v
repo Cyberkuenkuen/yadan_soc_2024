@@ -80,12 +80,12 @@ module ex(
     reg                     branch_flag;
     reg[`InstAddrBus]       branch_addr;
     
-    assign  wreg_o          =   (int_assert_i == `INT_ASSERT)? `WriteDisable: wreg;
-    assign  wreg_addr_o     =   wreg_addr;
-    assign  wreg_data_o     =   wreg_data;
+    assign  wreg_o          = (int_assert_i == `INT_ASSERT) ? `WriteDisable: wreg;
+    assign  wreg_addr_o     = wreg_addr;
+    assign  wreg_data_o     = wreg_data;
 
-    assign  branch_flag_o   =   (branch_flag == `BranchEnable) ||  ((int_assert_i == `INT_ASSERT)? `BranchEnable: `BranchDisable);
-    assign  branch_addr_o   =   (int_assert_i == `INT_ASSERT)? int_addr_i: branch_addr;
+    assign  branch_flag_o   = (branch_flag == `BranchEnable) || ((int_assert_i == `INT_ASSERT) ? `BranchEnable: `BranchDisable);
+    assign  branch_addr_o   = (int_assert_i == `INT_ASSERT) ? int_addr_i: branch_addr;
 
 
     // 保存运算结果

@@ -43,7 +43,7 @@ module ctrl(
             stalled_o   =  5'b01111;
         end else if (stallreq_from_id_i == `Stop || stallreq_from_interrupt_i == `Stop) begin    
             stalled_o   =  5'b00111;
-        end else if (stallreq_from_if_i == `Stop) begin   // && ex_branch_flag_i == `BranchDisable
+        end else if (stallreq_from_if_i == `Stop) begin
             stalled_o   =  5'b00011;
         end else begin
             stalled_o   =  5'b00000;
