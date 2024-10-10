@@ -47,7 +47,7 @@ module ctrl(
             stalled_o   =  5'b00011;
         end else begin
             stalled_o   =  5'b00000;
-        end            
+        end
     end
 
 endmodule // ctrl

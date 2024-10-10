@@ -62,7 +62,7 @@ module  yadan_riscv_sopc_tb();
             $display("********** ######### ***********");
             $display("********** test fail ***********");
             $display("********** ######### ***********");
-            $display("test fail inst = %2d", x3);       // 第多少条指令出错
+            $display("test fail inst = %2d", x3);       // 第几个case出错
         end
         `ifdef IVERILOG     $finish;
         `else               $stop;
