@@ -95,8 +95,18 @@ module ex(
     reg[`RegBus]    arithresult;    // 算术结果
     reg[`RegBus]    branchres;      // 跳转回写偏移结果
 
+    // aluop 传递到 访存阶段
+    always @(*) begin
+        aluop_o  = aluop_i;
+        operand2_o   = operand2_i; 
+        case (alusel_i)
+            `EXE_RES_LOAD:  memaddr_o   = (operand1_i + {{20{inst_i[31]}}, inst_i[31:20]});
+            `EXE_RES_STORE: memaddr_o   = (operand1_i + {{20{inst_i[31]}}, inst_i[31:25], inst_i[11:7]});
+            default:        memaddr_o   = `ZeroWord;
+        endcase
+    end
 
-
+    // 1. 根据 aluop_i 指示的运算子类型进行运算 
     //arith
     always @(*) begin
         if (muldiv_done_i) begin   // mul/div 运算结束
@@ -190,28 +200,15 @@ module ex(
             endcase
         end
     end
-
-    // aluop 传递到 访存阶段
-    always @(*) begin
-            aluop_o  = aluop_i;
-            operand2_o   = operand2_i; 
-            case (alusel_i)
-                `EXE_RES_LOAD:  memaddr_o   = (operand1_i + {{20{inst_i[31]}}, inst_i[31:20]});
-                `EXE_RES_STORE: memaddr_o   = (operand1_i + {{20{inst_i[31]}}, inst_i[31:25], inst_i[11:7]});
-                default:        memaddr_o   = `ZeroWord;
-            endcase
-    end
-
     
-    // 1. 根据 aluop_i 指示的运算子类型进行运算 
     // logic 
     always @ (*) begin
-            case (aluop_i)
-                `EXE_AND:   logicout = (operand1_i & operand2_i);
-                `EXE_OR:    logicout = (operand1_i | operand2_i);
-                `EXE_XOR:   logicout = (operand1_i ^ operand2_i);
-                default:    logicout = `ZeroWord;
-            endcase
+        case (aluop_i)
+            `EXE_AND:   logicout = (operand1_i & operand2_i);
+            `EXE_OR:    logicout = (operand1_i | operand2_i);
+            `EXE_XOR:   logicout = (operand1_i ^ operand2_i);
+            default:    logicout = `ZeroWord;
+        endcase
     end // always
 
     // compare

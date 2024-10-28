@@ -59,7 +59,7 @@ module regsfile
 
     genvar i;
     generate
-        for(i=1; i < `RegNum; i=i+1) begin
+        for(i=1; i < `RegNum; i=i+1) begin  //从reg1开始
             assign we_Q[i] = (i == waddr_i) ? `WriteEnable : `WriteDisable;
         end
     endgenerate
@@ -81,7 +81,7 @@ module regsfile
 
     always @(*) begin
         if ((raddr1_i == waddr_i) && (we_i == `WriteEnable) && (re1_i == `ReadEnable)) begin
-            rdata1 = wdata_i;
+            rdata1 = wdata_i;   //bypassing
         end else if (re1_i == `ReadEnable) begin
             rdata1 = reg_Q[raddr1_i];
         end else begin
@@ -92,7 +92,7 @@ module regsfile
     //read port 2
     always @(*) begin
         if ((raddr2_i == waddr_i) && (we_i == `WriteEnable) && (re2_i == `ReadEnable)) begin
-            rdata2 = wdata_i;
+            rdata2 = wdata_i;   //bypassing
         end else if (re2_i == `ReadEnable) begin
             rdata2 = reg_Q[raddr2_i];
         end else begin
@@ -104,7 +104,7 @@ module regsfile
     assign  rdata1_o  =  rdata1;
     assign  rdata2_o  =  rdata2;
 
-    //Simulation 
+    // names for simulation 
     wire [`RegBus] x0_zero_w = reg_Q[0];
     wire [`RegBus] x1_ra_w   = reg_Q[1];
     wire [`RegBus] x2_sp_w   = reg_Q[2];

@@ -50,12 +50,13 @@ module if_id(
             inst_o  <= `ZeroWord;
         end else begin
             if (ex_branch_flag_i == `BranchEnable) begin
-                pc_o    <= pc_i;
+                pc_o    <= `ZeroWord;
                 inst_o  <= `ZeroWord;
             end else if (stalled_i[1] == `NoStop) begin
                 pc_o    <= pc_i;
                 inst_o  <= inst_i;
             end else if (stalled_i[2] == `NoStop) begin
+                pc_o    <= `ZeroWord;
                 inst_o  <= `ZeroWord;
             end //else 保持不变
         end

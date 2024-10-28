@@ -30,7 +30,7 @@ module id(
     input   wire[`InstAddrBus]   pc_i,
     input   wire[`InstBus]       inst_i,
 
-    // read regs form regfile
+    // read regs from regsfile
     input   wire[`RegBus]        reg1_data_i,
     input   wire[`RegBus]        reg2_data_i,
 
@@ -122,16 +122,16 @@ module id(
             operand1_o  = `ZeroWord;
             reg1_stallreq = `Stop;
         // 如果：上条指令不是load，但目的寄存器 是本条指令的源寄存器1
-        // 那么存在RAW数据冒险，直接把执行阶段的结果 ex_wreg_data_i 作为 operand1_o 的值
+        // 那么存在RAW数据冒险，直接把执行阶段的结果 ex_wreg_data_i 作为 operand1_o 的值 (bypassing)
         end else if (ex_wreg_i == 1'b1 && ex_wreg_addr_i == reg1_addr_o) begin
             operand1_o  = ex_wreg_data_i;
             reg1_stallreq = `NoStop;
         // 如果：上上条指令的目的寄存器 是本条指令的源寄存器1
-        // 那么存在数据冒险RAW，直接把访存阶段的结果 mem_wreg_data_i 作为 operand1_o 的值
+        // 那么存在数据冒险RAW，直接把访存阶段的结果 mem_wreg_data_i 作为 operand1_o 的值 (bypassing)
         end else if (mem_wreg_i == 1'b1 && mem_wreg_addr_i == reg1_addr_o) begin
             operand1_o  = mem_wreg_data_i;
             reg1_stallreq = `NoStop;
-        //else 使用 register file port 1 的输出
+        //else 无数据冒险，正常读取register file port 1 的输出作为 operand1_o 的值 
         end else begin
             operand1_o  = reg1_data_i; 
             reg1_stallreq = `NoStop;        // regfile port 1 output data
