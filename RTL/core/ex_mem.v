@@ -38,7 +38,10 @@ module ex_mem(
     input   wire[`DataAddrBus]  ex_memaddr_i,
     input   wire[`RegBus]       ex_operand2_i,
 
-    input   wire[4:0]           stalled_i,
+    // input   wire[4:0]           stalled_i,
+    // input   wire[4:0]           flush_i,
+    input   wire                stalled_i,
+    input   wire                flush_i,
 
     // to mem
     output  reg                 mem_wreg_o,
@@ -59,20 +62,29 @@ module ex_mem(
             mem_memaddr_o       <= `ZeroWord;
             mem_operand2_o      <= `ZeroWord;
         end else begin
-            if (stalled_i[3] == `NoStop) begin
-                mem_wreg_o          <= ex_wreg_i;
-                mem_wreg_addr_o     <= ex_wreg_addr_i;
-                mem_wreg_data_o     <= ex_wreg_data_i;
-                mem_aluop_o         <= ex_aluop_i;
-                mem_memaddr_o       <= ex_memaddr_i;
-                mem_operand2_o      <= ex_operand2_i;
-            end else if (stalled_i[4] == `NoStop) begin
+            // if (flush_i[3] == 1) begin
+            if (flush_i == 1) begin
                 mem_wreg_o          <= `WriteDisable;
                 mem_wreg_addr_o     <= `NOPRegAddr;
                 mem_wreg_data_o     <= `ZeroWord;
                 mem_aluop_o         <= `EXE_NONE;
                 mem_memaddr_o       <= `ZeroWord;
                 mem_operand2_o      <= `ZeroWord;
+            // end else if (stalled_i[3] == `NoStop) begin
+            end else if (stalled_i == `NoStop) begin
+                mem_wreg_o          <= ex_wreg_i;
+                mem_wreg_addr_o     <= ex_wreg_addr_i;
+                mem_wreg_data_o     <= ex_wreg_data_i;
+                mem_aluop_o         <= ex_aluop_i;
+                mem_memaddr_o       <= ex_memaddr_i;
+                mem_operand2_o      <= ex_operand2_i;
+            // end else if (stalled_i[4] == `NoStop) begin
+            //     mem_wreg_o          <= `WriteDisable;
+            //     mem_wreg_addr_o     <= `NOPRegAddr;
+            //     mem_wreg_data_o     <= `ZeroWord;
+            //     mem_aluop_o         <= `EXE_NONE;
+            //     mem_memaddr_o       <= `ZeroWord;
+            //     mem_operand2_o      <= `ZeroWord;
             end //else 保持不变
         end
     end

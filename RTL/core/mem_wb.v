@@ -35,7 +35,10 @@ module mem_wb(
     input   wire[`RegBus]       mem_wreg_data_i,
 
     // from ctrl
-    input   wire[4:0]           stalled_i,
+    // input   wire[4:0]           stalled_i,
+    // input   wire[4:0]           flush_i,
+    input   wire                stalled_i,
+    input   wire                flush_i,
 
     // to regsfile (wb)
     output  reg                 wb_wreg_o,
@@ -48,7 +51,8 @@ module mem_wb(
             wb_wreg_addr_o  <= `NOPRegAddr;
             wb_wreg_o       <= `WriteDisable;
             wb_wreg_data_o  <= `ZeroWord;
-        end else if (stalled_i[4] == `NoStop) begin
+        // end else if (stalled_i[4] == `NoStop) begin
+        end else if (stalled_i == `NoStop) begin
             wb_wreg_addr_o  <= mem_wreg_addr_i;
             wb_wreg_o       <= mem_wreg_i;
             wb_wreg_data_o  <= mem_wreg_data_i;

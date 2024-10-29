@@ -37,7 +37,10 @@ module pc_reg(
     input   wire[`RegBus]    ex_branch_addr_i,
 
     // from ctrl
-    input   wire[4:0]        stalled_i,
+    // input   wire[4:0]           stalled_i,
+    // input   wire[4:0]           flush_i,
+    input   wire                stalled_i,
+    input   wire                flush_i,
 
     // to if_id
     output  reg[`InstAddrBus]pc_o,
@@ -55,7 +58,8 @@ module pc_reg(
             if(ex_branch_flag_i == `BranchEnable) begin
                 pc_o <= ex_branch_addr_i;
             // 优先根据跳转信号更新pc，如果在取指阶段发生流水线停顿，跳转信号不会因此丢失
-            end else if(stalled_i[0] == `NoStop) begin
+            // end else if(stalled_i[0] == `NoStop) begin
+            end else if(stalled_i == `NoStop) begin
                 if(pc_o < `INSTADD_END) begin
                     pc_o <= pc_o + 4'h4;
                 end else begin

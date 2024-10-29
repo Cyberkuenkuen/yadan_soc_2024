@@ -163,6 +163,7 @@ module yadan_riscv(
 
     // ctrl
     wire[4:0]               stall;  
+    wire[4:0]               flush;
     wire                    stallreq_from_id;
     wire                    stallreq_from_mem;
     wire                    stallreq_from_if;
@@ -206,7 +207,8 @@ module yadan_riscv(
         .ex_branch_addr_i   (ex_branch_addr),
 
         // from ctrl
-        .stalled_i          (stall),
+        .stalled_i          (stall[0]),
+        .flush_i            (flush[0]),
 
         // to if_id
         .pc_o               (if_pc),
@@ -231,7 +233,8 @@ module yadan_riscv(
         .ex_branch_flag_i   (ex_branch_flag),
 
         // from ctrl
-        .stalled_i          (stall),
+        .stalled_i          (stall[1]),
+        .flush_i            (flush[1]),
 
         // to id
         .pc_o               (if_id_pc),
@@ -335,7 +338,8 @@ module yadan_riscv(
         .ex_branch_flag_i   (ex_branch_flag),
         
         // from ctrl
-        .stalled_i          (stall),
+        .stalled_i          (stall[2]),
+        .flush_i            (flush[2]),
 
         // to ex
         .ex_pc_o            (id_ex_pc),
@@ -435,7 +439,8 @@ module yadan_riscv(
         .ex_operand2_i      (ex_operand2),
 
         // from ctrl
-        .stalled_i          (stall),
+        .stalled_i          (stall[3]),
+        .flush_i            (flush[3]),
 
         // to mem
         .mem_wreg_o         (ex_mem_wreg),
@@ -488,7 +493,8 @@ module yadan_riscv(
         .mem_wreg_data_i    (mem_wreg_data),
 
         // from ctrl
-        .stalled_i          (stall),
+        .stalled_i          (stall[4]),
+        .flush_i            (flush[4]),
 
         // to regsfile (wb)
         .wb_wreg_o          (wb_wreg),
@@ -506,7 +512,8 @@ module yadan_riscv(
 
         .ex_branch_flag_i           (ex_branch_flag),   // from ex
 
-        .stalled_o                  (stall)
+        .stalled_o                  (stall),
+        .flush_o                    (flush)
     );
     
 

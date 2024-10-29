@@ -37,7 +37,10 @@ module if_id(
     input   wire                    ex_branch_flag_i,
 
     // from ctrl
-    input   wire[4:0]               stalled_i,
+    // input   wire[4:0]           stalled_i,
+    // input   wire[4:0]           flush_i,
+    input   wire                stalled_i,
+    input   wire                flush_i,
 
     // to id
     output  reg[`InstAddrBus]       pc_o,
@@ -49,15 +52,19 @@ module if_id(
             pc_o    <= `ZeroWord;
             inst_o  <= `ZeroWord;
         end else begin
-            if (ex_branch_flag_i == `BranchEnable) begin
+            // if (ex_branch_flag_i == `BranchEnable) begin
+            // if (flush_i[1] == 1) begin
+            if (flush_i == 1) begin
                 pc_o    <= `ZeroWord;
                 inst_o  <= `ZeroWord;
-            end else if (stalled_i[1] == `NoStop) begin
+            // end else if (stalled_i[1] == `NoStop) begin
+            end else if (stalled_i == `NoStop) begin
                 pc_o    <= pc_i;
                 inst_o  <= inst_i;
-            end else if (stalled_i[2] == `NoStop) begin
-                pc_o    <= `ZeroWord;
-                inst_o  <= `ZeroWord;
+            // end else if (stalled_i[2] == `NoStop) begin
+            // end else if (flush_i[1] == 1) begin
+            //     pc_o    <= `ZeroWord;
+            //     inst_o  <= `ZeroWord;
             end //else 保持不变
         end
     end

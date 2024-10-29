@@ -47,7 +47,10 @@ module id_ex(
     input   wire                ex_branch_flag_i,
     
     // from ctrl
-    input   wire[4:0]           stalled_i,
+    // input   wire[4:0]           stalled_i,
+    // input   wire[4:0]           flush_i,
+    input   wire                stalled_i,
+    input   wire                flush_i,
 
     // to ex
     output  reg[`InstAddrBus]   ex_pc_o,
@@ -78,7 +81,9 @@ module id_ex(
             ex_wcsr_o       <= `WriteDisable;
             ex_wcsr_addr_o  <= `ZeroWord;
         end else begin
-            if (ex_branch_flag_i == `BranchEnable) begin
+            // if (ex_branch_flag_i == `BranchEnable) begin
+            // if (flush_i[2] == 1) begin
+            if (flush_i == 1) begin
                 ex_inst_o       <= `ZeroWord;
                 ex_pc_o         <= `ZeroWord;
                 ex_aluop_o      <= `EXE_NONE;
@@ -91,7 +96,8 @@ module id_ex(
                 ex_wcsr_o       <= `WriteDisable;
                 ex_wcsr_addr_o  <= `ZeroWord;
             // 不停顿，正常传递
-            end else if (stalled_i[2] == `NoStop) begin
+            // end else if (stalled_i[2] == `NoStop) begin
+            end else if (stalled_i == `NoStop) begin
                 ex_pc_o         <= id_pc_i;
                 ex_inst_o       <= id_inst_i;
                 ex_aluop_o      <= id_aluop_i;
@@ -103,19 +109,20 @@ module id_ex(
                 ex_csr_data_o   <= id_csr_data_i;
                 ex_wcsr_o       <= id_wcsr_i;
                 ex_wcsr_addr_o  <= id_wcsr_addr_i;
-            // 停顿，同时执行阶段不停顿，清空所有译码结果
-            end else if(stalled_i[3] == `NoStop) begin
-                ex_inst_o       <= `ZeroWord;
-                ex_pc_o         <= `ZeroWord;
-                ex_aluop_o      <= `EXE_NONE;
-                ex_alusel_o     <= `EXE_RES_NONE;
-                ex_operand1_o   <= `ZeroWord;
-                ex_operand2_o   <= `ZeroWord;
-                ex_wreg_o       <= `WriteDisable;
-                ex_wreg_addr_o  <= `NOPRegAddr;
-                ex_csr_data_o   <= `ZeroWord;
-                ex_wcsr_o       <= `WriteDisable;
-                ex_wcsr_addr_o  <= `ZeroWord;
+            // // 停顿，同时执行阶段不停顿，清空所有译码结果
+            // // end else if(stalled_i[3] == `NoStop) begin
+            // end else if (flush_i[2] == 1) begin
+            //     ex_inst_o       <= `ZeroWord;
+            //     ex_pc_o         <= `ZeroWord;
+            //     ex_aluop_o      <= `EXE_NONE;
+            //     ex_alusel_o     <= `EXE_RES_NONE;
+            //     ex_operand1_o   <= `ZeroWord;
+            //     ex_operand2_o   <= `ZeroWord;
+            //     ex_wreg_o       <= `WriteDisable;
+            //     ex_wreg_addr_o  <= `NOPRegAddr;
+            //     ex_csr_data_o   <= `ZeroWord;
+            //     ex_wcsr_o       <= `WriteDisable;
+            //     ex_wcsr_addr_o  <= `ZeroWord;
             end // else 译码阶段和执行阶段均停顿，保持不变
         end
     end
