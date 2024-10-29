@@ -34,7 +34,7 @@ module if_id(
     input   wire[`InstBus]          inst_i, // from cpu_ahb_if
 
     // from ex
-    input   wire                    ex_branch_flag_i,
+    // input   wire                    ex_branch_flag_i,
 
     // from ctrl
     // input   wire[4:0]           stalled_i,

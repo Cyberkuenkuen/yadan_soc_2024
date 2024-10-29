@@ -44,7 +44,7 @@ module id_ex(
     input   wire[`DataAddrBus]  id_wcsr_addr_i,
 
     // from ex
-    input   wire                ex_branch_flag_i,
+    // input   wire                ex_branch_flag_i,
     
     // from ctrl
     // input   wire[4:0]           stalled_i,

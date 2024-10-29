@@ -38,7 +38,7 @@ module id(
     input   wire                 ex_wreg_i,
     input   wire[`RegBus]        ex_wreg_data_i,
     input   wire[`RegAddrBus]    ex_wreg_addr_i,
-    input   wire                 ex_branch_flag_i,
+    // input   wire                 ex_branch_flag_i,
     input   wire[`AluOpBus]      ex_aluop_i, // load 相关
 
     // from mem

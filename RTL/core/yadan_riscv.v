@@ -230,7 +230,7 @@ module yadan_riscv(
         .inst_i             (rom_data),
 
         // from ex
-        .ex_branch_flag_i   (ex_branch_flag),
+        // .ex_branch_flag_i   (ex_branch_flag),
 
         // from ctrl
         .stalled_i          (stall[1]),
@@ -255,7 +255,7 @@ module yadan_riscv(
         .ex_wreg_i          (ex_wreg),
         .ex_wreg_addr_i     (ex_wreg_addr),
         .ex_wreg_data_i     (ex_wreg_data),
-        .ex_branch_flag_i   (ex_branch_flag),
+        // .ex_branch_flag_i   (ex_branch_flag),
         .ex_aluop_i         (ex_aluop),
 
         // from mem
@@ -335,7 +335,7 @@ module yadan_riscv(
         .id_wcsr_addr_i     (id_wcsr_addr),
 
         // from ex
-        .ex_branch_flag_i   (ex_branch_flag),
+        // .ex_branch_flag_i   (ex_branch_flag),
         
         // from ctrl
         .stalled_i          (stall[2]),
