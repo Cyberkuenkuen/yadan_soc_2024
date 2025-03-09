@@ -3,7 +3,7 @@ ENTRY(_start)
 
 MEMORY
 {
-    ROM (wxa!ri) : ORIGIN = 0x00000000, LENGTH = 64K
+    ROM (wxa!ri) : ORIGIN = 0x00000000, LENGTH = 4K
     RAM (wxa!ri) : ORIGIN = 0x10000000, LENGTH = 4K
 }
 

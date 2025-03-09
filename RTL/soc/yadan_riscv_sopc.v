@@ -79,16 +79,17 @@ module yadan_riscv_sopc(
         wire gpio_int;
         wire [1:0] s_spim_event;
         wire [`INT_BUS] intn;
-        wire timeaOint , timeaCint,timebOint,timebCint;
+        wire timer_0_Oint,timer_0_Cint,timer_1_Oint,timer_1_Cint;
         wire uartint;
-        assign intn = {timebCint,timebOint,timeaCint,timeaOint,s_spim_event,gpio_int,uartint};
-
+        // assign intn = {timer_1_Cint,timer_1_Oint,timer_0_Cint,timer_0_Oint,s_spim_event,gpio_int,uartint};
+        assign intn = {timer_1_Cint,timer_1_Oint,timer_0_Cint,timer_0_Oint,4'b0};
         
 yadan_riscv  u_yadan_riscv (
     // in
     .clk                     ( clk          ),
     .rst_n                   ( rst          ),
-    .int_flag_i              (  8'b0        ),//intn 
+    // .int_flag_i              ( intn         ),// 8'b0
+    .int_flag_i              ( 8'b0         ),
     .M0_HGRANT               ( M0_HGRANT    ),
     .M1_HGRANT               ( M1_HGRANT    ),
     .M_HRDATA                ( M_HRDATA     ),
@@ -319,7 +320,7 @@ amba_ahb_m2s5  u_amba_ahb_m2s5 (
     assign S8_PREADY = 1'b1;
     assign S8_PSLVERR = 1'b1;
 
-/* 
+
     ahb_to_apb_9s u_ahb_to_apb_9s(
         .HRESETn        (rst),   
         .HCLK           (clk),
@@ -380,7 +381,6 @@ amba_ahb_m2s5  u_amba_ahb_m2s5 (
         .S8_PREADY      (S8_PREADY  ),       
         .S8_PSLVERR     (S8_PSLVERR )
     );
- */
 
 /* wire [31:0] gpio_in_w;
 wire [31:0] gpio_out_w;
@@ -496,13 +496,13 @@ apb_gpio#(
     .spi_sdi2     ( 1'b0 ),
     .spi_sdi3     ( 1'b0 )
   );
-
+*/
 
     apb_timer u_apb_timer(
         .HCLK       (  clk     ),
-        .HRESETn     (  rst     ),
+        .HRESETn    (  rst     ),
         .PSEL       (  S4_HSEL & S3_PSEL     ),
-        .PENABLE     (  S_PENABLE     ),
+        .PENABLE    (  S_PENABLE     ),
         .PWRITE     (  S_PWRITE     ),
         .PADDR      (  S_PADDR[11:0]     ),
         .PWDATA     (  S_PWDATA     ),
@@ -512,8 +512,8 @@ apb_gpio#(
 
         .PSLVERR    (S3_PSLVERR),
 
-        .irq_o      ({timebCint,timebOint,timeaCint,timeaOint})
-    ); */
+        .irq_o      ({timer_1_Cint,timer_1_Oint,timer_0_Cint,timer_0_Oint})
+    ); 
 
 
 

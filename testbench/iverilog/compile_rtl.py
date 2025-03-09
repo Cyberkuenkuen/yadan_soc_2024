@@ -50,6 +50,9 @@ def main():
     
     # periphery 没加完
     iverilog_cmd.append(periphery_dir + r'/amba_ahb_m2s5.v')
+    iverilog_cmd.append(periphery_dir + r'/ahb_apb_9.v')
+    # iverilog_cmd.append(periphery_dir + r'/timer/apb_timer.sv')
+    # iverilog_cmd.append(periphery_dir + r'/timer/timer.sv')
 
     # memory
     iverilog_cmd.append(memory_dir + r'/AHB2MEM_RAM.v')

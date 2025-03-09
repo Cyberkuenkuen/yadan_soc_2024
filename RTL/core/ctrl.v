@@ -39,7 +39,7 @@ module ctrl(
 
     always @(*) begin
         if(ex_branch_flag_i == `BranchEnable) begin
-            stalled_o   =  5'b00000;
+            stalled_o   =  5'b00001;
             flush_o     =  5'b00110;
         end else if (stallreq_from_mem_i == `Stop) begin //&& ex_branch_flag_i == `BranchDisable) begin  
             stalled_o   =  5'b11111;

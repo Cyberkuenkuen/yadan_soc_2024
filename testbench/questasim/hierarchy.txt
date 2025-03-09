@@ -18,6 +18,9 @@
 /core/cpu_ahb_mem.v
 /core/interrupt_ctrl.v
 /periphery/amba_ahb_m2s5.v
+/periphery/ahb_apb_9.v
+/periphery/timer/apb_timer.sv
+/periphery/timer/timer.sv
 /ram/AHB2MEM_RAM.v
 /ram/AHB2MEM_ROM.v
 /ram/data_ram.v

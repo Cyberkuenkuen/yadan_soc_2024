@@ -21,16 +21,24 @@ errors = {
     "long_stay":[]
 }
 
-def write_s_files_to_file(directory, output_file, ):
+def write_s_files_to_file(directory, output_file):
     try:
-        # 获取目录中的所有文件名
-        filelist = os.listdir(directory)
-        # 过滤出以 .S 结尾的文件
-        sim_type = [filenames for filenames in filelist if os.path.isdir(f'./inst_to_test/{filenames}')]
-        s_files=[]
-        for seldir in sim_type:
-            s_list = os.listdir(f'./inst_to_test/{seldir}')
-            s_files += [f'./{seldir}/{filename}' for filename in s_list if filename.endswith('.S')]
+        # 指定要提取的特定目录
+        target_dirs = ['rv32ui', 'rv32um']
+        s_files = []
+        
+        # 遍历指定的目录
+        for target_dir in target_dirs:
+            target_path = os.path.join(directory, target_dir)
+            
+            # 检查目录是否存在
+            if os.path.isdir(target_path):
+                # 获取目录中的所有文件
+                files_in_dir = os.listdir(target_path)
+                
+                # 过滤出以 .S 结尾的文件并添加路径，但不包含最高层目录
+                s_files += [f'./{target_dir}/{filename}' for filename in files_in_dir if filename.endswith('.S')]
+        
         # 将文件名写入到输出文件中
         with open(output_file, 'w') as f:
             for filename in s_files:

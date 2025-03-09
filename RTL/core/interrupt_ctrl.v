@@ -48,6 +48,8 @@ module interrupt_ctrl(
     localparam CSR_IDLE         = 4'b0000;
     localparam CSR_MEPC         = 4'b0001;  //更新mepc寄存器
     localparam CSR_MCAUSE       = 4'b0010;  //更新mcause寄存器，mcause用于存储异常或中断的原因，机器模式
+                                            //同时传递信号给ex，使branch跳转到mtvec
+                                            
     localparam CSR_MSTATUS      = 4'b0100;  //更新mstatus寄存器
     localparam CSR_MSTATUS_MRET = 4'b1000;  //处理mret指令，恢复mstatus寄存器
  
@@ -58,8 +60,8 @@ module interrupt_ctrl(
     reg [31:0]          cause;
     reg [`InstAddrBus]  inst_addr;
 
-    reg                 branch_flag_ff1;////////////////////////////////////////////////
-    reg [`RegBus]       branch_addr_ff1;/////////////////////////////////////////////////
+    reg                 branch_flag_ff1;
+    reg [`RegBus]       branch_addr_ff1;
 
     reg                     state_flag;
 
@@ -114,15 +116,16 @@ module interrupt_ctrl(
 
             end else if(int_mode == ASYNC) begin
                 // 记录异常原因
-                if(|int_flag_i[5:0] || |int_flag_i[13:10])
-                    cause <= {1'b1,6'h0,int_flag_i,11'h8};
-                else if(|int_flag_i[9:6])
-                    cause <= {1'b1,6'h0,int_flag_i,11'h4};
+                // if(|int_flag_i[5:0] || |int_flag_i[13:10])
+                //     cause <= {1'b1,6'h0,int_flag_i,11'h8};
+                // else if(|int_flag_i[9:6])
+                //     cause <= {1'b1,6'h0,int_flag_i,11'h4};
+                cause <= {1'b1, 19'b0, int_flag_i, 4'b0};
                 // 记录异常发生位置
                 if (branch_flag_i == `BranchEnable)         // 当前处于ex阶段的指令发生了跳转
                     inst_addr <= branch_addr_i;             // 跳转目标地址
                 else if (branch_flag_ff1 == `BranchEnable)  // 当前处于mem阶段的指令发生了跳转。pc的更新还未传递到id阶段
-                    inst_addr <= branch_addr_ff1;           // 跳转目标地址
+                    inst_addr <= branch_addr_ff1;           // 跳转目标地址；以上两个条件不会同时成立
                 else if (muldiv_start_i)
                     inst_addr <= inst_addr_i - 4'h4;
                 else
