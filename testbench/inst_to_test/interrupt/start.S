@@ -1,15 +1,18 @@
     .section .text;
     .align  2;
-    .globl _init;
+    .globl _start;
+		.type _start,@function
 
-_init:
+_start:
     .option push
     .option norelax
 	la gp, __global_pointer$
     .option pop
     la sp, _sp
+#ifdef SIMULATION
     li x26, 0x00
     li x27, 0x00
+#endif
 
     /* Load data section */
 	la a0, _data_lma
@@ -34,10 +37,12 @@ _init:
 	bltu a0, a1, 1b
 2:
 
-    call _start
-    # call testdiv
+    call _init
+    call main
 
+#ifdef SIMULATION
     li x26, 0x01
+#endif
 
 loop:
     j loop

@@ -18,6 +18,7 @@ ASFLAGS = -march=$(RISCV_ARCH)
 CFLAGS += -march=$(RISCV_ARCH)
 CFLAGS += -mabi=$(RISCV_ABI)
 CFLAGS += -O2 -static -mcmodel=medany -fvisibility=hidden -nostdlib -nostartfiles --std=gnu99 
+CFLAGS += -DSIMULATION
 
 # rv32um = ./rv32um/
 # rv32ui = ./rv32ui/
@@ -32,6 +33,13 @@ CFLAGS += -O2 -static -mcmodel=medany -fvisibility=hidden -nostdlib -nostartfile
 # testfile += $(SELECTED_S_FILE)
 # testfile += $(rv32ui)riscv_test.h 
 # testfile += $(rv32ui)test_macros.h
+testfile += start.S
+testfile += trap_entry.S
+testfile += init.c
+testfile += main.c
+testfile += trap_handler.c
+testfile += utils.h
+testfile += timer.h
 
 # *************************************
 # Rules of Compilation
